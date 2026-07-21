@@ -9,9 +9,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useExercises,
+  useUserExercises,
   useTemplateWithExercises,
   useCreateSession,
   useLatestRecordByExercise,
+  useUserPresetWithExercises,
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
 
@@ -29,15 +31,20 @@ interface ExerciseData {
 }
 
 export default function NewSessionScreen() {
-  const { templateId, quickStart } = useLocalSearchParams<{ templateId?: string; quickStart?: string }>();
+  const { templateId, quickStart, presetId } = useLocalSearchParams<{ templateId?: string; quickStart?: string; presetId?: string }>();
   const { user } = useAuth();
   const { data: exercises } = useExercises();
+  const { data: userEx } = useUserExercises(user?.id || null);
   const { data: template } = useTemplateWithExercises(templateId || null);
+  const { data: userPreset } = useUserPresetWithExercises(presetId || null);
   const createSession = useCreateSession();
   const [sessionName, setSessionName] = useState('');
   const [exerciseData, setExerciseData] = useState<ExerciseData[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Merged exercise list
+  const allExercises = [...(exercises || []), ...(userEx || [])];
 
   // Quick presets (mirrored from home screen)
   const QUICK_PRESETS: Record<string, { label: string; name: string; exercises: { id: string; name: string; sets: number; reps: number; muscle: string }[] }> = {

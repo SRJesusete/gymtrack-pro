@@ -81,3 +81,37 @@ export interface VolumeByMuscleGroup {
   volume: number;
   date: string;
 }
+
+export interface UserExercise {
+  id: string;
+  userId: string;
+  name: string;
+  muscleGroup: string;
+  category: string;
+  description: string;
+}
+
+export interface UserPreset {
+  id: string;
+  userId: string;
+  name: string;
+  icon: string;
+  color: string;
+  level: string;
+  createdAt: string;
+}
+
+export interface UserPresetExercise {
+  id: string;
+  presetId: string;
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: string;
+  defaultSets: number;
+  defaultReps: number;
+  sortOrder: number;
+}
+
+export interface UserPresetWithExercises extends UserPreset {
+  exercises: UserPresetExercise[];
+}
