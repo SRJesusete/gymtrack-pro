@@ -31,7 +31,7 @@ interface ExerciseData {
 }
 
 export default function NewSessionScreen() {
-  const { templateId, quickStart, presetId } = useLocalSearchParams<{ templateId?: string; quickStart?: string; presetId?: string }>();
+  const { templateId, quickStart, presetId, date } = useLocalSearchParams<{ templateId?: string; quickStart?: string; presetId?: string; date?: string }>();
   const { user } = useAuth();
   const { data: exercises } = useExercises();
   const { data: userEx } = useUserExercises(user?.id || null);
@@ -42,6 +42,15 @@ export default function NewSessionScreen() {
   const [exerciseData, setExerciseData] = useState<ExerciseData[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // If date param is provided, pre-fill name with friendly date
+  useEffect(() => {
+    if (date && !sessionName && !templateId && !quickStart && !presetId) {
+      const d = new Date(date + 'T00:00:00');
+      const friendly = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      setSessionName(`Entreno ${friendly}`);
+    }
+  }, [date]);
 
   // Merged exercise list
   const allExercises = [...(exercises || []), ...(userEx || [])];
