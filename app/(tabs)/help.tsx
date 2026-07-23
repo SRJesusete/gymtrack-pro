@@ -4,9 +4,10 @@ import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Theme, Spinner, Input, Divider,
 } from '@blinkdotnew/mobile-ui';
-import { PlayCircle, Search, Dumbbell, ChevronDown, ChevronUp, ExternalLink } from '@blinkdotnew/mobile-ui';
+import { PlayCircle, Search, Dumbbell, ChevronDown, ChevronUp, ExternalLink, Info } from '@blinkdotnew/mobile-ui';
 import { useExercises, useUserExercises } from '@/hooks/useDatabase';
 import { useAuth } from '@/hooks/useAuth';
+import { router } from 'expo-router';
 import type { Exercise, UserExercise } from '@/types';
 
 const MUSCLE_GROUPS = [
@@ -270,12 +271,19 @@ export default function HelpScreen() {
                                 </Paragraph>
                               ) : null}
                             </YStack>
-                            <Button
-                              chromeless
-                              theme="green"
-                              onPress={() => openVideo(ex.name)}
-                              icon={<Youtube size={18} color="#FF0000" />}
-                            />
+                            <XStack gap="$1">
+                              <Button
+                                chromeless
+                                onPress={() => router.push(`/exercise/${ex.id}`)}
+                                icon={<Info size={18} color="$color9" />}
+                              />
+                              <Button
+                                chromeless
+                                theme="green"
+                                onPress={() => openVideo(ex.name)}
+                                icon={<PlayCircle size={18} color="#FF0000" />}
+                              />
+                            </XStack>
                           </XStack>
 
                           {/* Expand tips */}

@@ -297,6 +297,92 @@ export function useLatestRecordByExercise(userId: string | null, exerciseId: str
   });
 }
 
+// -- EXERCISE HISTORY (for detail screen) --
+
+export interface ExerciseHistoryPoint {
+  sessionId: string;
+  sessionName: string;
+  date: string;
+  maxWeight: number;
+  topSet: { weight: number; reps: number };
+  volume: number;
+  sets: SessionSet[];
+}
+
+export function useExerciseHistory(userId: string | null, exerciseId: string) {
+  return useQuery({
+    queryKey: ['exerciseHistory', userId, exerciseId],
+    queryFn: async () => {
+      if (!userId || !exerciseId) return [];
+
+      // Fetch all session exercises for this specific exercise
+      const sesExs = await blink.db.table<SessionExercise>('sessionExercises').list({
+        where: { exerciseId },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      if (sesExs.length === 0) return [];
+
+      // Batch-fetch all related sessions (avoid N+1)
+      const sessionIds = [...new Set(sesExs.map((se) => se.sessionId))];
+      const sessions: Session[] = [];
+      for (const sid of sessionIds) {
+        const s = await blink.db.table<Session>('sessions').get(sid);
+        if (s && s.userId === userId) sessions.push(s);
+      }
+      const sessionMap = new Map(sessions.map((s) => [s.id, s]));
+
+      // Fetch sets for each session exercise
+      const points: ExerciseHistoryPoint[] = [];
+      for (const se of sesExs) {
+        const session = sessionMap.get(se.sessionId);
+        if (!session) continue;
+
+        const sets = await blink.db.table<SessionSet>('sessionSets').list({
+          where: { sessionExerciseId: se.id },
+          orderBy: { setNumber: 'asc' },
+        });
+
+        if (sets.length === 0) continue;
+
+        const maxWeight = Math.max(...sets.map((s) => s.weight || 0));
+        const topWeightSet = sets.reduce((best, s) => (s.weight > best.weight ? s : best), sets[0]);
+        const volume = sets.reduce((sum, s) => sum + (s.weight || 0) * (s.reps || 0), 0);
+
+        points.push({
+          sessionId: session.id,
+          sessionName: session.name,
+          date: session.startedAt,
+          maxWeight,
+          topSet: { weight: topWeightSet.weight, reps: topWeightSet.reps },
+          volume,
+          sets,
+        });
+      }
+
+      // Sort by date descending
+      points.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return points;
+    },
+    enabled: !!userId && !!exerciseId,
+  });
+}
+
+export function useExerciseById(exerciseId: string | null) {
+  return useQuery({
+    queryKey: ['exercise', exerciseId],
+    queryFn: async () => {
+      if (!exerciseId) return null;
+      // Try built-in first, then user exercises
+      const ex = await blink.db.table<Exercise>('exercises').get(exerciseId);
+      if (ex) return ex;
+      const uex = await blink.db.table<UserExercise>('userExercises').get(exerciseId);
+      return uex || null;
+    },
+    enabled: !!exerciseId,
+  });
+}
+
 // -- SUGGESTED WEIGHT (progressive overload) --
 
 export function getSuggestedWeight(lastWeight: number, lastReps: number): number {

@@ -41,6 +41,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="session/[id]" />
               <Stack.Screen name="session/new" />
+              <Stack.Screen name="exercise/[id]" />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />
