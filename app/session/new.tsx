@@ -4,8 +4,9 @@ import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Input, Theme, toast, Spinner, BlinkDialog,
 } from '@blinkdotnew/mobile-ui';
-import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame } from '@blinkdotnew/mobile-ui';
+import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame, HelpCircle, PlayCircle, X } from '@blinkdotnew/mobile-ui';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Linking } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useExercises,
@@ -16,6 +17,7 @@ import {
   useUserPresetWithExercises,
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
+import { getGuide } from '@/constants/exerciseGuides';
 
 interface SetData {
   weight: string;
@@ -42,6 +44,7 @@ export default function NewSessionScreen() {
   const [exerciseData, setExerciseData] = useState<ExerciseData[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [guideExercise, setGuideExercise] = useState<{ name: string; muscle: string } | null>(null);
 
   // If date param is provided, pre-fill name with friendly date
   useEffect(() => {
@@ -407,6 +410,7 @@ function ExerciseCard({
           <Paragraph size="$2" color="$color10">{exercise.muscleGroup}</Paragraph>
         </YStack>
         <Button chromeless onPress={onRemoveExercise} icon={<Trash2 size={18} color="$red9" />} />
+        <Button chromeless onPress={() => onShowGuide?.(exercise.exerciseName, exercise.muscleGroup)} icon={<HelpCircle size={18} color="$color9" />} />
       </XStack>
 
       {/* Set Headers */}
