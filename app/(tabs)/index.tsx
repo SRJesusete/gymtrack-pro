@@ -2,12 +2,13 @@ import { useState, useCallback } from 'react';
 import { ScrollView, Alert } from 'react-native';
 import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
-  Input, Theme, Spinner, BlinkDialog, toast,
+  Input, Theme, Spinner, BlinkDialog, toast, Divider,
 } from '@blinkdotnew/mobile-ui';
-import { ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2 } from '@blinkdotnew/mobile-ui';
+import { Play, ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2 } from '@blinkdotnew/mobile-ui';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
+  useTemplates,
   useSessions,
   useAllExercises,
   useCreateUserExercise,
@@ -73,12 +74,14 @@ interface PresetExercise {
 
 export default function WorkoutHome() {
   const { user, isLoading: authLoading } = useAuth();
+  const { data: templates, isLoading: tlLoading } = useTemplates(user?.id || null);
   const { data: sessions, isLoading: ssLoading } = useSessions(user?.id || null);
   const { data: allExercises } = useAllExercises(user?.id || null);
   const { data: userPresets } = useUserPresets(user?.id || null);
   const createCustomExercise = useCreateUserExercise();
   const createPreset = useCreateUserPreset();
   const deletePreset = useDeleteUserPreset();
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   // Custom exercise modal
   const [showExerciseCreator, setShowExerciseCreator] = useState(false);
@@ -95,6 +98,11 @@ export default function WorkoutHome() {
   const [creatingPreset, setCreatingPreset] = useState(false);
 
   const latestSession = sessions?.[0];
+
+  const handleStartFromTemplate = useCallback(() => {
+    if (!selectedTemplate) return;
+    router.push(`/session/new?templateId=${selectedTemplate}`);
+  }, [selectedTemplate]);
 
   const handleBuiltInPreset = useCallback((level: string) => {
     router.push(`/session/new?quickStart=${level}`);
@@ -223,6 +231,8 @@ export default function WorkoutHome() {
               })}
             </XStack>
           </YStack>
+
+          {/* User Custom Presets */}
 
           {/* User Presets */}
           {userPresets && userPresets.length > 0 && (
