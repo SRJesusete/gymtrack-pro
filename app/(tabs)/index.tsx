@@ -4,7 +4,7 @@ import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Input, Theme, Spinner, BlinkDialog, toast,
 } from '@blinkdotnew/mobile-ui';
-import { ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2, TrendingUp, Clock, BarChart3 } from '@blinkdotnew/mobile-ui';
+import { ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2, TrendingUp, Clock, BarChart3, ChevronDown } from '@blinkdotnew/mobile-ui';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -15,10 +15,17 @@ import {
   useCreateUserPreset,
   useDeleteUserPreset,
 } from '@/hooks/useDatabase';
-import { CATEGORIES, ALL_PRESETS, type CategoryDef } from '@/constants/workoutPresets';
+import { CATEGORIES, type CategoryDef, type LevelDef } from '@/constants/workoutPresets';
 
-// ── Icon map for category icons (string → component) ──
+// ── Icon map (string → component) ──
 const ICON_MAP: Record<string, any> = { TrendingUp, BarChart3, Dumbbell, Flame, Target, Zap };
+
+// ── Level badge colors ──
+const LEVEL_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
+  'Facil':    { bg: '#22C55E18', text: '#22C55E', dot: '#22C55E' },
+  'Medio':   { bg: '#F9731618', text: '#F97316', dot: '#F97316' },
+  'Dificil': { bg: '#EF444418', text: '#EF4444', dot: '#EF4444' },
+};
 
 // ── Other constants ──
 const MUSCLE_GROUPS = ['Pecho', 'Espalda', 'Piernas', 'Hombros', 'Brazos', 'Core'];
@@ -82,7 +89,7 @@ export default function WorkoutHome() {
 
   const handleCreatePreset = async () => {
     if (!user || !newPresetName.trim()) return;
-    if (presetExercises.length === 0) { Alert.alert('Sin ejercicios', 'Añade al menos uno.'); return; }
+    if (presetExercises.length === 0) { Alert.alert('Sin ejercicios', 'Anade al menos uno.'); return; }
     setCreatingPreset(true);
     try {
       await createPreset.mutateAsync({ userId: user.id, name: newPresetName.trim(), level: 'custom', color: newPresetColor, exercises: presetExercises });
@@ -96,7 +103,7 @@ export default function WorkoutHome() {
   };
 
   const handleDeletePreset = (presetId: string, name: string) => {
-    Alert.alert('Eliminar preset', `¿Seguro que quieres eliminar "${name}"?`, [
+    Alert.alert('Eliminar preset', `Seguro que quieres eliminar "${name}"?`, [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Eliminar', style: 'destructive', onPress: () => deletePreset.mutate(presetId) },
     ]);
@@ -124,19 +131,19 @@ export default function WorkoutHome() {
       <YStack flex={1} backgroundColor="$color1">
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
 
-          {/* ▸ Header */}
+          {/* Header */}
           <YStack padding="$4" paddingTop="$6" gap="$1">
             <H2 color="$color12" fontWeight="800">GymTrack Pro</H2>
-            <Paragraph color="$color10">{user ? '¿Qué entrenas hoy?' : 'Tu diario de entrenamiento'}</Paragraph>
+            <Paragraph color="$color10">{user ? 'Que entrenas hoy?' : 'Tu diario de entrenamiento'}</Paragraph>
           </YStack>
 
-          {/* ▸ Last Session */}
+          {/* Last Session */}
           {!ssLoading && latestSession && (
             <YStack paddingHorizontal="$4" marginBottom="$4">
               <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2" onPress={() => router.push(`/session/${latestSession.id}`)}>
                 <XStack justifyContent="space-between" alignItems="center">
                   <YStack gap="$1">
-                    <Paragraph size="$1" color="$color10" fontWeight="600">ÚLTIMO ENTRENO</Paragraph>
+                    <Paragraph size="$1" color="$color10" fontWeight="600">ULTIMO ENTRENO</Paragraph>
                     <Paragraph fontWeight="700" color="$color12">{latestSession.name}</Paragraph>
                     <XStack gap="$3">
                       <Paragraph size="$2" color="$color10">
@@ -151,84 +158,100 @@ export default function WorkoutHome() {
             </YStack>
           )}
 
-          {/* ▸ Categories */}
-          <YStack paddingHorizontal="$4" gap="$4">
-            <H3 color="$color11">Entreno Rápido</H3>
+          {/* Categories */}
+          <YStack paddingHorizontal="$4" gap="$3">
+            <H3 color="$color11">Entreno Rapido</H3>
 
             {CATEGORIES.map((cat) => {
               const isOpen = expandedCategory === cat.id;
               const Icon = ICON_MAP[cat.icon] || Dumbbell;
 
               return (
-                <YStack key={cat.id} gap="$1">
+                <YStack key={cat.id} gap="$0">
                   {/* Category Header */}
                   <Card
                     bordered
                     padding="$4"
                     borderRadius="$4"
-                    backgroundColor={cat.color + '12'}
+                    backgroundColor={isOpen ? (cat.color + '16') : '$color2'}
                     onPress={() => setExpandedCategory(isOpen ? null : cat.id)}
                   >
                     <XStack justifyContent="space-between" alignItems="center">
                       <XStack gap="$3" alignItems="center">
-                        <YStack width={44} height={44} borderRadius={12} backgroundColor={cat.color + '20'} justifyContent="center" alignItems="center">
+                        <YStack width={44} height={44} borderRadius={12} backgroundColor={cat.color + '22'} justifyContent="center" alignItems="center">
                           <Icon size={22} color={cat.color} />
                         </YStack>
-                        <YStack>
-                          <XStack gap="$2" alignItems="center">
-                            <H4 color="$color12" fontWeight="700">{cat.title}</H4>
-                            <Paragraph size="$1" color={cat.color} fontWeight="600">
-                              {cat.presetIds.length} niveles
-                            </Paragraph>
-                          </XStack>
+                        <YStack gap="$0.5">
+                          <H4 color="$color12" fontWeight="700">{cat.title}</H4>
                           <Paragraph size="$2" color="$color10">{cat.desc}</Paragraph>
                         </YStack>
                       </XStack>
-                      <ChevronRight size={18} color="$color10" style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }} />
+                      <XStack gap="$2" alignItems="center">
+                        <Paragraph size="$1" color={cat.color} fontWeight="700">{cat.levels.length} niveles</Paragraph>
+                        <ChevronRight size={16} color="$color10" style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }} />
+                      </XStack>
                     </XStack>
                   </Card>
 
-                  {/* Expanded Presets */}
-                  {isOpen && cat.presetIds.map((pid) => {
-                    const preset = ALL_PRESETS[pid];
-                    if (!preset) return null;
-                    return (
-                      <Card
-                        key={pid}
-                        bordered
-                        padding="$3"
-                        borderRadius="$3"
-                        backgroundColor="$color2"
-                        marginLeft="$3"
-                        onPress={() => handleStartWorkout(pid)}
-                      >
-                        <XStack justifyContent="space-between" alignItems="center">
-                          <YStack gap="$2">
-                            <XStack gap="$2" alignItems="center" flexWrap="wrap">
-                              <Paragraph fontWeight="600" color="$color12" size="$3">{preset.name}</Paragraph>
-                              <XStack gap="$1" alignItems="center">
-                                <Clock size={12} color="$color10" />
-                                <Paragraph size="$2" color="$color10">~{preset.exercises.length * 8 + 5} min</Paragraph>
+                  {/* Level Cards */}
+                  {isOpen && (
+                    <YStack gap="$2" paddingTop="$2" paddingLeft="$3">
+                      {cat.levels.map((lvl) => {
+                        const style = LEVEL_STYLES[lvl.badge] || LEVEL_STYLES['Medio'];
+                        return (
+                          <Card
+                            key={lvl.id}
+                            bordered
+                            padding="$4"
+                            borderRadius="$4"
+                            backgroundColor="$color2"
+                            onPress={() => handleStartWorkout(lvl.id)}
+                          >
+                            {/* Level header row */}
+                            <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
+                              <XStack gap="$2" alignItems="center">
+                                {/* Badge */}
+                                <YStack paddingHorizontal="$2" paddingVertical="$1" backgroundColor={style.bg} borderRadius="$2">
+                                  <Paragraph size="$1" color={style.text} fontWeight="700">{lvl.badge}</Paragraph>
+                                </YStack>
+                                <Paragraph fontWeight="600" color="$color12" size="$3">{lvl.label}</Paragraph>
+                              </XStack>
+                              <XStack gap="$2" alignItems="center">
+                                <XStack gap="$1" alignItems="center">
+                                  <Clock size={12} color="$color10" />
+                                  <Paragraph size="$2" color="$color10">{lvl.time}</Paragraph>
+                                </XStack>
+                                <ChevronRight size={16} color={cat.color} />
                               </XStack>
                             </XStack>
-                            <Paragraph size="$2" color="$color10" numberOfLines={2}>
-                              {preset.exercises.map((e) => e.name).join(' · ')}
-                            </Paragraph>
-                          </YStack>
-                          <YStack alignItems="center" gap="$1">
-                            <Paragraph size="$2" color={cat.color} fontWeight="800">{preset.exercises.length}</Paragraph>
-                            <Paragraph size="$1" color="$color10">ejerc.</Paragraph>
-                          </YStack>
-                        </XStack>
-                      </Card>
-                    );
-                  })}
+
+                            {/* Exercise list */}
+                            <YStack gap="$2">
+                              {lvl.exercises.map((ex, i) => (
+                                <XStack key={i} justifyContent="space-between" alignItems="center">
+                                  <XStack gap="$2" alignItems="center" flex={1}>
+                                    <YStack width={6} height={6} borderRadius={3} backgroundColor={cat.color + '50'} />
+                                    <Paragraph size="$2" color="$color11" flex={1}>{ex.name}</Paragraph>
+                                  </XStack>
+                                  <XStack gap="$1">
+                                    <YStack paddingHorizontal="$2" paddingVertical="$1" backgroundColor="$color3" borderRadius="$2" minWidth={50} alignItems="center">
+                                      <Paragraph size="$1" color="$color10" fontWeight="600">{ex.sets} x {ex.reps}</Paragraph>
+                                    </YStack>
+                                  </XStack>
+                                </XStack>
+                              ))}
+                            </YStack>
+                          </Card>
+                        );
+                      })}
+                    </YStack>
+                  )}
                 </YStack>
               );
             })}
           </YStack>
 
-          {/* ▸ User Presets */}
+          {/* User Presets */}
           {userPresets && userPresets.length > 0 && (
             <YStack paddingHorizontal="$4" gap="$3" marginTop="$5">
               <H3 color="$color11">Mis Presets</H3>
@@ -249,7 +272,7 @@ export default function WorkoutHome() {
             </YStack>
           )}
 
-          {/* ▸ User actions */}
+          {/* User actions */}
           {user && (
             <YStack paddingHorizontal="$4" gap="$2" marginTop="$3">
               <XStack gap="$2">
@@ -259,17 +282,17 @@ export default function WorkoutHome() {
             </YStack>
           )}
 
-          {/* ▸ Auth CTA */}
+          {/* Auth CTA */}
           {!user && (
             <YStack padding="$4" marginTop="$5" alignItems="center" gap="$3">
-              <Paragraph color="$color10" textAlign="center">Inicia sesión para crear ejercicios y presets personalizados</Paragraph>
-              <Button theme="active" width="100%" onPress={() => router.push('/(tabs)/profile')} icon={<User size={18} />}>Iniciar Sesión</Button>
+              <Paragraph color="$color10" textAlign="center">Inicia sesion para crear ejercicios y presets personalizados</Paragraph>
+              <Button theme="active" width="100%" onPress={() => router.push('/(tabs)/profile')} icon={<User size={18} />}>Iniciar Sesion</Button>
             </YStack>
           )}
 
         </ScrollView>
 
-        {/* ▸ Create Exercise Dialog */}
+        {/* Create Exercise Dialog */}
         <BlinkDialog open={showExerciseCreator} onOpenChange={setShowExerciseCreator} title="Nuevo Ejercicio" description="Crea tu propio ejercicio personalizado">
           <YStack gap="$3" padding="$2">
             <Input placeholder="Nombre del ejercicio" value={newExName} onChangeText={setNewExName} size="$4" />
@@ -285,8 +308,8 @@ export default function WorkoutHome() {
           </YStack>
         </BlinkDialog>
 
-        {/* ▸ Create Preset Dialog */}
-        <BlinkDialog open={showPresetCreator} onOpenChange={setShowPresetCreator} title="Nuevo Preset" description="Crea tu propio preset de inicio rápido">
+        {/* Create Preset Dialog */}
+        <BlinkDialog open={showPresetCreator} onOpenChange={setShowPresetCreator} title="Nuevo Preset" description="Crea tu propio preset de inicio rapido">
           <ScrollView style={{ maxHeight: 500 }}>
             <YStack gap="$3" padding="$2">
               <Input placeholder="Nombre del preset" value={newPresetName} onChangeText={setNewPresetName} size="$4" />
@@ -308,7 +331,7 @@ export default function WorkoutHome() {
                   </XStack>
                 </Card>
               ))}
-              <Button variant="outline" width="100%" onPress={() => setShowExPicker(true)} icon={<Plus size={16} />}>Añadir Ejercicio</Button>
+              <Button variant="outline" width="100%" onPress={() => setShowExPicker(true)} icon={<Plus size={16} />}>Anadir Ejercicio</Button>
               {showExPicker && (
                 <YStack gap="$2"><Paragraph color="$color11" fontWeight="600">Selecciona ejercicios:</Paragraph>
                   <ScrollView style={{ maxHeight: 250 }}><YStack gap="$1">
@@ -316,7 +339,7 @@ export default function WorkoutHome() {
                       <Card key={ex.id} bordered padding="$3" borderRadius="$3" onPress={() => addExToPreset(ex)} opacity={presetExercises.some((pe) => pe.exerciseId === ex.id) ? 0.4 : 1}>
                         <XStack justifyContent="space-between" alignItems="center">
                           <YStack><Paragraph fontWeight="600" color="$color12">{ex.name}</Paragraph><Paragraph size="$2" color="$color10">{ex.muscleGroup}</Paragraph></YStack>
-                          {presetExercises.some((pe) => pe.exerciseId === ex.id) && <Paragraph size="$2" color="$green9">Añadido</Paragraph>}
+                          {presetExercises.some((pe) => pe.exerciseId === ex.id) && <Paragraph size="$2" color="$green9">Anadido</Paragraph>}
                         </XStack>
                       </Card>
                     ))}
