@@ -18,6 +18,7 @@ import {
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
 import { getGuide } from '@/constants/exerciseGuides';
+import { ALL_PRESETS } from '@/constants/workoutPresets';
 
 interface SetData {
   weight: string;
@@ -58,52 +59,10 @@ export default function NewSessionScreen() {
   // Merged exercise list
   const allExercises = [...(exercises || []), ...(userEx || [])];
 
-  // Quick presets (mirrored from home screen)
-  const QUICK_PRESETS: Record<string, { label: string; name: string; exercises: { id: string; name: string; sets: number; reps: number; muscle: string }[] }> = {
-    facil: {
-      label: 'Fácil',
-      name: 'Entreno Ligero',
-      exercises: [
-        { id: 'ex_bench_press', name: 'Press Banca', sets: 3, reps: 10, muscle: 'Pecho' },
-        { id: 'ex_lat_pulldown', name: 'Jalón al Pecho', sets: 3, reps: 10, muscle: 'Espalda' },
-        { id: 'ex_squat', name: 'Sentadilla', sets: 3, reps: 12, muscle: 'Piernas' },
-        { id: 'ex_ohp', name: 'Press Militar', sets: 3, reps: 10, muscle: 'Hombros' },
-        { id: 'ex_plank', name: 'Plancha Abdominal', sets: 3, reps: 30, muscle: 'Core' },
-      ],
-    },
-    medio: {
-      label: 'Medio',
-      name: 'Entreno Equilibrado',
-      exercises: [
-        { id: 'ex_bench_press', name: 'Press Banca', sets: 4, reps: 8, muscle: 'Pecho' },
-        { id: 'ex_pullups', name: 'Dominadas', sets: 4, reps: 8, muscle: 'Espalda' },
-        { id: 'ex_squat', name: 'Sentadilla', sets: 4, reps: 8, muscle: 'Piernas' },
-        { id: 'ex_barbell_row', name: 'Remo con Barra', sets: 4, reps: 10, muscle: 'Espalda' },
-        { id: 'ex_ohp', name: 'Press Militar', sets: 4, reps: 8, muscle: 'Hombros' },
-        { id: 'ex_barbell_curl', name: 'Curl de Bíceps', sets: 3, reps: 12, muscle: 'Brazos' },
-        { id: 'ex_french_press', name: 'Press Francés', sets: 3, reps: 12, muscle: 'Brazos' },
-      ],
-    },
-    dificil: {
-      label: 'Difícil',
-      name: 'Entreno Intenso',
-      exercises: [
-        { id: 'ex_deadlift', name: 'Peso Muerto', sets: 5, reps: 5, muscle: 'Espalda' },
-        { id: 'ex_bench_press', name: 'Press Banca', sets: 5, reps: 5, muscle: 'Pecho' },
-        { id: 'ex_squat', name: 'Sentadilla', sets: 5, reps: 5, muscle: 'Piernas' },
-        { id: 'ex_pullups', name: 'Dominadas', sets: 4, reps: 8, muscle: 'Espalda' },
-        { id: 'ex_ohp', name: 'Press Militar', sets: 4, reps: 8, muscle: 'Hombros' },
-        { id: 'ex_barbell_row', name: 'Remo con Barra', sets: 4, reps: 8, muscle: 'Espalda' },
-        { id: 'ex_barbell_curl', name: 'Curl de Bíceps', sets: 3, reps: 10, muscle: 'Brazos' },
-        { id: 'ex_lateral_raise', name: 'Elevaciones Laterales', sets: 3, reps: 15, muscle: 'Hombros' },
-      ],
-    },
-  };
-
-  // Init from quick preset
+  // Init from quick preset (uses shared ALL_PRESETS)
   useEffect(() => {
-    if (quickStart && QUICK_PRESETS[quickStart] && exerciseData.length === 0 && !template) {
-      const preset = QUICK_PRESETS[quickStart];
+    if (quickStart && ALL_PRESETS[quickStart] && exerciseData.length === 0 && !template) {
+      const preset = ALL_PRESETS[quickStart];
       setSessionName(preset.name);
       const data: ExerciseData[] = preset.exercises.map((pe) => ({
         exerciseId: pe.id,
@@ -302,6 +261,7 @@ export default function NewSessionScreen() {
               onUpdateSet={(i, f, v) => updateSet(exIndex, i, f, v)}
               onToggleWarmup={(i) => toggleWarmup(exIndex, i)}
               onRemoveExercise={() => removeExercise(exIndex)}
+              onShowGuide={(name, muscle) => setGuideExercise({ name, muscle })}
               userId={user?.id || null}
             />
           ))}
@@ -360,6 +320,54 @@ export default function NewSessionScreen() {
             </YStack>
           </ScrollView>
         </BlinkDialog>
+
+        {/* Exercise Guide Dialog */}
+        <BlinkDialog
+          open={!!guideExercise}
+          onOpenChange={(v) => { if (!v) setGuideExercise(null); }}
+          title={guideExercise?.name || 'Guía del Ejercicio'}
+          description={`Técnica correcta para ${guideExercise?.name || ''}`}
+        >
+          {guideExercise && (() => {
+            const guide = getGuide(guideExercise.name);
+            return (
+              <YStack gap="$3" padding="$2">
+                {guide.tips.length > 0 && (
+                  <YStack gap="$1">
+                    <Paragraph color="$green9" fontWeight="700" size="$2">Técnica correcta</Paragraph>
+                    {guide.tips.map((tip, i) => (
+                      <XStack key={i} gap="$2" alignItems="center">
+                        <YStack width={6} height={6} borderRadius={3} backgroundColor="$green9" />
+                        <Paragraph size="$2" color="$color11">{tip}</Paragraph>
+                      </XStack>
+                    ))}
+                  </YStack>
+                )}
+                {guide.errors.length > 0 && (
+                  <YStack gap="$1" marginTop="$1">
+                    <Paragraph color="$red9" fontWeight="700" size="$2">Errores comunes</Paragraph>
+                    {guide.errors.map((err, i) => (
+                      <XStack key={i} gap="$2" alignItems="center">
+                        <YStack width={6} height={6} borderRadius={3} backgroundColor="$red9" />
+                        <Paragraph size="$2" color="$color11">{err}</Paragraph>
+                      </XStack>
+                    ))}
+                  </YStack>
+                )}
+                <Button
+                  variant="outline"
+                  size="$3"
+                  width="100%"
+                  marginTop="$2"
+                  onPress={() => Linking.openURL(guide.videoUrl)}
+                  icon={<PlayCircle size={16} color="#FF0000" />}
+                >
+                  <Paragraph size="$2" color="#FF0000">Ver video en YouTube</Paragraph>
+                </Button>
+              </YStack>
+            );
+          })()}
+        </BlinkDialog>
       </YStack>
     </Theme>
   );
@@ -375,6 +383,7 @@ function ExerciseCard({
   onUpdateSet,
   onToggleWarmup,
   onRemoveExercise,
+  onShowGuide,
   userId,
 }: {
   exercise: ExerciseData;
@@ -384,6 +393,7 @@ function ExerciseCard({
   onUpdateSet: (i: number, field: 'weight' | 'reps', value: string) => void;
   onToggleWarmup: (i: number) => void;
   onRemoveExercise: () => void;
+  onShowGuide?: (name: string, muscle: string) => void;
   userId: string | null;
 }) {
   const { data: pr } = useLatestRecordByExercise(userId, exercise.exerciseId);
