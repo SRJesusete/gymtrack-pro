@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Dumbbell, History, TrendingUp, User, Calendar } from '@blinkdotnew/mobile-ui';
+import { Dumbbell, History, ClipboardList, TrendingUp, User } from '@blinkdotnew/mobile-ui';
 
 export default function TabLayout() {
   return (
@@ -17,15 +17,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
+          title: 'Entreno',
           tabBarIcon: ({ color, size }) => <Dumbbell size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: 'Calendario',
-          tabBarIcon: ({ color, size }) => <Calendar size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -33,6 +26,13 @@ export default function TabLayout() {
         options={{
           title: 'Historial',
           tabBarIcon: ({ color, size }) => <History size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="templates"
+        options={{
+          title: 'Plantillas',
+          tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
         }}
       />
       <Tabs.Screen

@@ -4,21 +4,16 @@ import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Input, Theme, toast, Spinner, BlinkDialog,
 } from '@blinkdotnew/mobile-ui';
-import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame, HelpCircle, PlayCircle, X } from '@blinkdotnew/mobile-ui';
+import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame } from '@blinkdotnew/mobile-ui';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Linking } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useExercises,
-  useUserExercises,
   useTemplateWithExercises,
   useCreateSession,
   useLatestRecordByExercise,
-  useUserPresetWithExercises,
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
-import { getGuide } from '@/constants/exerciseGuides';
-import { ALL_PRESETS } from '@/constants/workoutPresets';
 
 interface SetData {
   weight: string;
@@ -34,49 +29,15 @@ interface ExerciseData {
 }
 
 export default function NewSessionScreen() {
-  const { templateId, quickStart, presetId, date } = useLocalSearchParams<{ templateId?: string; quickStart?: string; presetId?: string; date?: string }>();
+  const { templateId } = useLocalSearchParams<{ templateId?: string }>();
   const { user } = useAuth();
   const { data: exercises } = useExercises();
-  const { data: userEx } = useUserExercises(user?.id || null);
   const { data: template } = useTemplateWithExercises(templateId || null);
-  const { data: userPreset } = useUserPresetWithExercises(presetId || null);
   const createSession = useCreateSession();
   const [sessionName, setSessionName] = useState('');
   const [exerciseData, setExerciseData] = useState<ExerciseData[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [guideExercise, setGuideExercise] = useState<{ name: string; muscle: string } | null>(null);
-
-  // If date param is provided, pre-fill name with friendly date
-  useEffect(() => {
-    if (date && !sessionName && !templateId && !quickStart && !presetId) {
-      const d = new Date(date + 'T00:00:00');
-      const friendly = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-      setSessionName(`Entreno ${friendly}`);
-    }
-  }, [date]);
-
-  // Merged exercise list
-  const allExercises = [...(exercises || []), ...(userEx || [])];
-
-  // Init from quick preset (uses shared ALL_PRESETS)
-  useEffect(() => {
-    if (quickStart && ALL_PRESETS[quickStart] && exerciseData.length === 0 && !template) {
-      const preset = ALL_PRESETS[quickStart];
-      setSessionName(preset.name);
-      const data: ExerciseData[] = preset.exercises.map((pe) => ({
-        exerciseId: pe.id,
-        exerciseName: pe.name,
-        muscleGroup: pe.muscle,
-        sets: Array.from({ length: pe.sets }, () => ({
-          weight: '',
-          reps: String(pe.reps),
-          isWarmup: false,
-        })),
-      }));
-      setExerciseData(data);
-    }
-  }, [quickStart]);
 
   // Init from template
   useEffect(() => {
@@ -261,7 +222,6 @@ export default function NewSessionScreen() {
               onUpdateSet={(i, f, v) => updateSet(exIndex, i, f, v)}
               onToggleWarmup={(i) => toggleWarmup(exIndex, i)}
               onRemoveExercise={() => removeExercise(exIndex)}
-              onShowGuide={(name, muscle) => setGuideExercise({ name, muscle })}
               userId={user?.id || null}
             />
           ))}
@@ -320,54 +280,6 @@ export default function NewSessionScreen() {
             </YStack>
           </ScrollView>
         </BlinkDialog>
-
-        {/* Exercise Guide Dialog */}
-        <BlinkDialog
-          open={!!guideExercise}
-          onOpenChange={(v) => { if (!v) setGuideExercise(null); }}
-          title={guideExercise?.name || 'Guía del Ejercicio'}
-          description={`Técnica correcta para ${guideExercise?.name || ''}`}
-        >
-          {guideExercise && (() => {
-            const guide = getGuide(guideExercise.name);
-            return (
-              <YStack gap="$3" padding="$2">
-                {guide.tips.length > 0 && (
-                  <YStack gap="$1">
-                    <Paragraph color="$green9" fontWeight="700" size="$2">Técnica correcta</Paragraph>
-                    {guide.tips.map((tip, i) => (
-                      <XStack key={i} gap="$2" alignItems="center">
-                        <YStack width={6} height={6} borderRadius={3} backgroundColor="$green9" />
-                        <Paragraph size="$2" color="$color11">{tip}</Paragraph>
-                      </XStack>
-                    ))}
-                  </YStack>
-                )}
-                {guide.errors.length > 0 && (
-                  <YStack gap="$1" marginTop="$1">
-                    <Paragraph color="$red9" fontWeight="700" size="$2">Errores comunes</Paragraph>
-                    {guide.errors.map((err, i) => (
-                      <XStack key={i} gap="$2" alignItems="center">
-                        <YStack width={6} height={6} borderRadius={3} backgroundColor="$red9" />
-                        <Paragraph size="$2" color="$color11">{err}</Paragraph>
-                      </XStack>
-                    ))}
-                  </YStack>
-                )}
-                <Button
-                  variant="outline"
-                  size="$3"
-                  width="100%"
-                  marginTop="$2"
-                  onPress={() => Linking.openURL(guide.videoUrl)}
-                  icon={<PlayCircle size={16} color="#FF0000" />}
-                >
-                  <Paragraph size="$2" color="#FF0000">Ver video en YouTube</Paragraph>
-                </Button>
-              </YStack>
-            );
-          })()}
-        </BlinkDialog>
       </YStack>
     </Theme>
   );
@@ -383,7 +295,6 @@ function ExerciseCard({
   onUpdateSet,
   onToggleWarmup,
   onRemoveExercise,
-  onShowGuide,
   userId,
 }: {
   exercise: ExerciseData;
@@ -393,7 +304,6 @@ function ExerciseCard({
   onUpdateSet: (i: number, field: 'weight' | 'reps', value: string) => void;
   onToggleWarmup: (i: number) => void;
   onRemoveExercise: () => void;
-  onShowGuide?: (name: string, muscle: string) => void;
   userId: string | null;
 }) {
   const { data: pr } = useLatestRecordByExercise(userId, exercise.exerciseId);
@@ -420,7 +330,6 @@ function ExerciseCard({
           <Paragraph size="$2" color="$color10">{exercise.muscleGroup}</Paragraph>
         </YStack>
         <Button chromeless onPress={onRemoveExercise} icon={<Trash2 size={18} color="$red9" />} />
-        <Button chromeless onPress={() => onShowGuide?.(exercise.exerciseName, exercise.muscleGroup)} icon={<HelpCircle size={18} color="$color9" />} />
       </XStack>
 
       {/* Set Headers */}
