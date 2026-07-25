@@ -4,7 +4,7 @@ import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Input, Theme, Spinner, BlinkDialog, toast,
 } from '@blinkdotnew/mobile-ui';
-import { ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2, TrendingUp, Clock, BarChart3, ChevronDown } from '@blinkdotnew/mobile-ui';
+import { ChevronRight, Dumbbell, User, Zap, Flame, Target, Plus, Edit3, Trash2, TrendingUp, Clock, BarChart3, Sprout, Trophy, Gauge, ChevronDown } from '@blinkdotnew/mobile-ui';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -20,11 +20,11 @@ import { CATEGORIES, type CategoryDef, type LevelDef } from '@/constants/workout
 // ── Icon map (string → component) ──
 const ICON_MAP: Record<string, any> = { TrendingUp, BarChart3, Dumbbell, Flame, Target, Zap };
 
-// ── Level badge colors ──
-const LEVEL_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-  'Facil':    { bg: '#22C55E18', text: '#22C55E', dot: '#22C55E' },
-  'Medio':   { bg: '#F9731618', text: '#F97316', dot: '#F97316' },
-  'Dificil': { bg: '#EF444418', text: '#EF4444', dot: '#EF4444' },
+// ── Level badge colors + icons ──
+const LEVEL_STYLES: Record<string, { bg: string; text: string; border: string; tint: string; icon: any }> = {
+  'Facil':    { bg: '#22C55E18', text: '#22C55E', border: '#22C55E', tint: '#22C55E0A', icon: Sprout },
+  'Medio':   { bg: '#F9731618', text: '#F97316', border: '#F97316', tint: '#F973160A', icon: Gauge },
+  'Dificil': { bg: '#EF444418', text: '#EF4444', border: '#EF4444', tint: '#EF44440A', icon: Trophy },
 };
 
 // ── Other constants ──
@@ -198,46 +198,77 @@ export default function WorkoutHome() {
                     <YStack gap="$2" paddingTop="$2" paddingLeft="$3">
                       {cat.levels.map((lvl) => {
                         const style = LEVEL_STYLES[lvl.badge] || LEVEL_STYLES['Medio'];
+                        const LevelIcon = style.icon;
                         return (
                           <Card
                             key={lvl.id}
                             bordered
-                            padding="$4"
+                            padding={0}
                             borderRadius="$4"
-                            backgroundColor="$color2"
+                            backgroundColor={style.tint}
+                            borderColor={style.border + '30'}
+                            borderWidth={1.5}
+                            overflow="hidden"
                             onPress={() => handleStartWorkout(lvl.id)}
                           >
-                            {/* Level header row */}
-                            <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
-                              <XStack gap="$2" alignItems="center">
-                                {/* Badge */}
-                                <YStack paddingHorizontal="$2" paddingVertical="$1" backgroundColor={style.bg} borderRadius="$2">
-                                  <Paragraph size="$1" color={style.text} fontWeight="700">{lvl.badge}</Paragraph>
+                            {/* Level header — colored stripe */}
+                            <XStack
+                              padding="$3"
+                              backgroundColor={style.bg}
+                              borderBottomWidth={1}
+                              borderBottomColor={style.border + '20'}
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
+                              <XStack gap="$2.5" alignItems="center">
+                                <YStack
+                                  width={32} height={32}
+                                  borderRadius={8}
+                                  backgroundColor={style.border + '25'}
+                                  justifyContent="center" alignItems="center"
+                                >
+                                  <LevelIcon size={16} color={style.text} />
                                 </YStack>
-                                <Paragraph fontWeight="600" color="$color12" size="$3">{lvl.label}</Paragraph>
+                                <YStack gap="$0">
+                                  <Paragraph fontWeight="700" color="$color12" size="$3">{lvl.label}</Paragraph>
+                                  <XStack gap="$1.5" alignItems="center">
+                                    <YStack width={5} height={5} borderRadius={3} backgroundColor={style.border} />
+                                    <Paragraph size="$1" color={style.text} fontWeight="600">{lvl.badge}</Paragraph>
+                                  </XStack>
+                                </YStack>
                               </XStack>
-                              <XStack gap="$2" alignItems="center">
-                                <XStack gap="$1" alignItems="center">
-                                  <Clock size={12} color="$color10" />
-                                  <Paragraph size="$2" color="$color10">{lvl.time}</Paragraph>
+                              <XStack gap="$2.5" alignItems="center">
+                                <XStack gap="$1" alignItems="center" backgroundColor={style.tint} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2">
+                                  <Clock size={11} color={style.text} />
+                                  <Paragraph size="$1" color={style.text} fontWeight="600">{lvl.time}</Paragraph>
                                 </XStack>
-                                <ChevronRight size={16} color={cat.color} />
+                                <ChevronRight size={15} color={style.text} />
                               </XStack>
                             </XStack>
 
-                            {/* Exercise list */}
-                            <YStack gap="$2">
+                            {/* Exercise list body */}
+                            <YStack padding="$3" gap="$2">
                               {lvl.exercises.map((ex, i) => (
                                 <XStack key={i} justifyContent="space-between" alignItems="center">
-                                  <XStack gap="$2" alignItems="center" flex={1}>
-                                    <YStack width={6} height={6} borderRadius={3} backgroundColor={cat.color + '50'} />
-                                    <Paragraph size="$2" color="$color11" flex={1}>{ex.name}</Paragraph>
+                                  <XStack gap="$2.5" alignItems="center" flex={1}>
+                                    <YStack
+                                      width={7} height={7} borderRadius={3}
+                                      backgroundColor={style.border}
+                                      opacity={0.7}
+                                    />
+                                    <Paragraph size="$2" color="$color11" flex={1} fontWeight="500">{ex.name}</Paragraph>
                                   </XStack>
-                                  <XStack gap="$1">
-                                    <YStack paddingHorizontal="$2" paddingVertical="$1" backgroundColor="$color3" borderRadius="$2" minWidth={50} alignItems="center">
-                                      <Paragraph size="$1" color="$color10" fontWeight="600">{ex.sets} x {ex.reps}</Paragraph>
-                                    </YStack>
-                                  </XStack>
+                                  <YStack
+                                    paddingHorizontal="$2" paddingVertical="$0.5"
+                                    backgroundColor={style.tint}
+                                    borderRadius="$2"
+                                    borderWidth={0.5}
+                                    borderColor={style.border + '25'}
+                                    minWidth={52}
+                                    alignItems="center"
+                                  >
+                                    <Paragraph size="$1" color={style.text} fontWeight="700">{ex.sets} x {ex.reps}</Paragraph>
+                                  </YStack>
                                 </XStack>
                               ))}
                             </YStack>
