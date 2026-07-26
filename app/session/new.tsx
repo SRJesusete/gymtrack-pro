@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScrollView, Alert } from 'react-native';
 import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
-  Input, Theme, toast, Spinner, BlinkDialog,
+  Input, Theme, toast, Spinner, BlinkDialog, Circle,
 } from '@blinkdotnew/mobile-ui';
-import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame } from '@blinkdotnew/mobile-ui';
+import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame, Clock, Target } from '@blinkdotnew/mobile-ui';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -14,6 +14,7 @@ import {
   useLatestRecordByExercise,
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
+import { getPresetById, type WorkoutPreset } from '@/constants/workoutPresets';
 
 interface SetData {
   weight: string;
@@ -29,7 +30,7 @@ interface ExerciseData {
 }
 
 export default function NewSessionScreen() {
-  const { templateId } = useLocalSearchParams<{ templateId?: string }>();
+  const { templateId, presetId } = useLocalSearchParams<{ templateId?: string; presetId?: string }>();
   const { user } = useAuth();
   const { data: exercises } = useExercises();
   const { data: template } = useTemplateWithExercises(templateId || null);
@@ -39,9 +40,29 @@ export default function NewSessionScreen() {
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const preset = useMemo(() => (presetId ? getPresetById(presetId) : undefined), [presetId]);
+
+  // Init from preset
+  useEffect(() => {
+    if (preset && exerciseData.length === 0) {
+      setSessionName(preset.name);
+      const data: ExerciseData[] = preset.exercises.map((pe) => ({
+        exerciseId: pe.exerciseId,
+        exerciseName: pe.exerciseName,
+        muscleGroup: pe.muscleGroup,
+        sets: Array.from({ length: pe.defaultSets }, () => ({
+          weight: '',
+          reps: String(pe.defaultReps),
+          isWarmup: false,
+        })),
+      }));
+      setExerciseData(data);
+    }
+  }, [preset]);
+
   // Init from template
   useEffect(() => {
-    if (template && exerciseData.length === 0) {
+    if (!preset && template && exerciseData.length === 0) {
       setSessionName(template.name);
       const data: ExerciseData[] = template.exercises.map((te) => ({
         exerciseId: te.exerciseId,
@@ -55,7 +76,7 @@ export default function NewSessionScreen() {
       }));
       setExerciseData(data);
     }
-  }, [template]);
+  }, [template, preset]);
 
   const addExercise = (ex: { id: string; name: string; muscleGroup: string }) => {
     setExerciseData((prev) => [
@@ -191,7 +212,7 @@ export default function NewSessionScreen() {
           <XStack padding="$4" paddingTop="$6" justifyContent="space-between" alignItems="center">
             <Button chromeless onPress={() => router.back()} icon={<ArrowLeft size={20} />} />
             <H2 color="$color12" fontWeight="800">
-              Nuevo Entreno
+              {preset ? preset.name : 'Nuevo Entreno'}
             </H2>
             <Button
               chromeless
@@ -200,6 +221,49 @@ export default function NewSessionScreen() {
               icon={saving ? <Spinner size="small" /> : <Save size={20} color="$color9" />}
             />
           </XStack>
+
+          {/* Preset info banner */}
+          {preset && (
+            <YStack paddingHorizontal="$4" marginBottom="$3">
+              <Card
+                bordered
+                padding="$3"
+                borderRadius="$4"
+                backgroundColor="$color2"
+              >
+                <XStack alignItems="center" gap="$3">
+                  <Circle size={44} backgroundColor="$color3">
+                    <Paragraph size="$7">{preset.icon}</Paragraph>
+                  </Circle>
+                  <YStack flex={1} gap="$1">
+                    <Paragraph color="$color10" size="$2" numberOfLines={2}>
+                      {preset.description}
+                    </Paragraph>
+                    <XStack gap="$4">
+                      <XStack alignItems="center" gap="$1">
+                        <Clock size={12} color="$color10" />
+                        <Paragraph size="$1" color="$color10">
+                          ~{preset.estimatedMinutes} min
+                        </Paragraph>
+                      </XStack>
+                      <XStack alignItems="center" gap="$1">
+                        <Dumbbell size={12} color="$color10" />
+                        <Paragraph size="$1" color="$color10">
+                          {preset.exercises.length} ejercicios
+                        </Paragraph>
+                      </XStack>
+                      <XStack alignItems="center" gap="$1">
+                        <Target size={12} color="$color10" />
+                        <Paragraph size="$1" color="$color10">
+                          Nivel: {preset.level}
+                        </Paragraph>
+                      </XStack>
+                    </XStack>
+                  </YStack>
+                </XStack>
+              </Card>
+            </YStack>
+          )}
 
           {/* Session Name */}
           <YStack paddingHorizontal="$4" gap="$2">

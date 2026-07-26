@@ -1,240 +1,227 @@
-// ── Shared workout presets — 3 niveles por categoría ──
+// Workout presets organized by difficulty level
+// Each preset contains exercises from the DB with default sets/reps
 
-export interface PresetExerciseSimple {
+export type WorkoutLevel = 'principiante' | 'intermedio' | 'avanzado';
+
+export interface PresetExercise {
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: string;
+  defaultSets: number;
+  defaultReps: number;
+}
+
+export interface WorkoutPreset {
   id: string;
   name: string;
-  sets: number;
-  reps: number;
-  muscle: string;
+  description: string;
+  level: WorkoutLevel;
+  icon: string; // muscle group focus emoji
+  color: string; // accent color for card
+  estimatedMinutes: number;
+  exercises: PresetExercise[];
 }
 
-export interface LevelDef {
-  id: string;
-  label: string;
-  badge: string;        // e.g. "Principiante", "Intermedio", "Avanzado"
-  color: string;        // badge color
-  time: string;         // e.g. "~30 min"
-  exercises: PresetExerciseSimple[];
-}
-
-export interface CategoryDef {
-  id: string;
+export interface LevelInfo {
+  level: WorkoutLevel;
   title: string;
+  subtitle: string;
   icon: string;
-  desc: string;
   color: string;
-  levels: LevelDef[];
 }
 
-// ── PUSH ──
-
-const PUSH_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',          sets: 3, reps: 12, muscle: 'Pecho' },
-  { id: 'ex_ohp',          name: 'Press Militar',         sets: 3, reps: 12, muscle: 'Hombros' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales',  sets: 3, reps: 15, muscle: 'Hombros' },
-  { id: 'ex_french_press', name: 'Press Frances',         sets: 3, reps: 15, muscle: 'Brazos' },
-];
-
-const PUSH_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',          sets: 4, reps: 8,  muscle: 'Pecho' },
-  { id: 'ex_incline_bench',name: 'Press Inclinado',       sets: 3, reps: 10, muscle: 'Pecho' },
-  { id: 'ex_ohp',          name: 'Press Militar',         sets: 4, reps: 8,  muscle: 'Hombros' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales',  sets: 3, reps: 12, muscle: 'Hombros' },
-  { id: 'ex_french_press', name: 'Press Frances',         sets: 3, reps: 10, muscle: 'Brazos' },
-];
-
-const PUSH_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',          sets: 5, reps: 5,  muscle: 'Pecho' },
-  { id: 'ex_incline_bench',name: 'Press Inclinado',       sets: 4, reps: 8,  muscle: 'Pecho' },
-  { id: 'ex_db_fly',       name: 'Aperturas Mancuernas',  sets: 3, reps: 12, muscle: 'Pecho' },
-  { id: 'ex_ohp',          name: 'Press Militar',         sets: 4, reps: 6,  muscle: 'Hombros' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales',  sets: 4, reps: 12, muscle: 'Hombros' },
-  { id: 'ex_french_press', name: 'Press Frances',         sets: 4, reps: 8,  muscle: 'Brazos' },
-];
-
-// ── PULL ──
-
-const PULL_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho', sets: 3, reps: 12, muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',  sets: 3, reps: 12, muscle: 'Espalda' },
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 3, reps: 15, muscle: 'Brazos' },
-];
-
-const PULL_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho', sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',  sets: 4, reps: 10, muscle: 'Espalda' },
-  { id: 'ex_pullups',      name: 'Dominadas',       sets: 3, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 3, reps: 12, muscle: 'Brazos' },
-];
-
-const PULL_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_deadlift',     name: 'Peso Muerto',     sets: 5, reps: 5,  muscle: 'Espalda' },
-  { id: 'ex_pullups',      name: 'Dominadas',       sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',  sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho',  sets: 3, reps: 10, muscle: 'Espalda' },
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 4, reps: 10, muscle: 'Brazos' },
-];
-
-// ── PIERNAS ──
-
-const LEGS_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_squat',    name: 'Sentadilla',         sets: 3, reps: 12, muscle: 'Piernas' },
-  { id: 'ex_leg_press',name: 'Prensa de Piernas',   sets: 3, reps: 12, muscle: 'Piernas' },
-  { id: 'ex_plank',    name: 'Plancha Abdominal',   sets: 3, reps: 30, muscle: 'Core' },
-];
-
-const LEGS_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_squat',    name: 'Sentadilla',         sets: 4, reps: 8,  muscle: 'Piernas' },
-  { id: 'ex_leg_press',name: 'Prensa de Piernas',   sets: 4, reps: 10, muscle: 'Piernas' },
-  { id: 'ex_deadlift', name: 'Peso Muerto Rumano',  sets: 3, reps: 10, muscle: 'Piernas' },
-  { id: 'ex_plank',    name: 'Plancha Abdominal',   sets: 3, reps: 40, muscle: 'Core' },
-];
-
-const LEGS_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_squat',    name: 'Sentadilla',         sets: 5, reps: 5,  muscle: 'Piernas' },
-  { id: 'ex_leg_press',name: 'Prensa de Piernas',   sets: 4, reps: 8,  muscle: 'Piernas' },
-  { id: 'ex_deadlift', name: 'Peso Muerto Rumano',  sets: 4, reps: 8,  muscle: 'Piernas' },
-  { id: 'ex_plank',    name: 'Plancha Abdominal',   sets: 3, reps: 45, muscle: 'Core' },
-];
-
-// ── FULL BODY ──
-
-const FB_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_squat',        name: 'Sentadilla',         sets: 3, reps: 12, muscle: 'Piernas' },
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 3, reps: 12, muscle: 'Pecho' },
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho',     sets: 3, reps: 12, muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 3, reps: 12, muscle: 'Hombros' },
-  { id: 'ex_plank',        name: 'Plancha Abdominal',  sets: 3, reps: 30, muscle: 'Core' },
-];
-
-const FB_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_squat',        name: 'Sentadilla',         sets: 4, reps: 8,  muscle: 'Piernas' },
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 4, reps: 8,  muscle: 'Pecho' },
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho',     sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',     sets: 3, reps: 10, muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 4, reps: 8,  muscle: 'Hombros' },
-  { id: 'ex_plank',        name: 'Plancha Abdominal',  sets: 3, reps: 40, muscle: 'Core' },
-];
-
-const FB_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_deadlift',     name: 'Peso Muerto',        sets: 5, reps: 5,  muscle: 'Espalda' },
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 5, reps: 5,  muscle: 'Pecho' },
-  { id: 'ex_squat',        name: 'Sentadilla',         sets: 5, reps: 5,  muscle: 'Piernas' },
-  { id: 'ex_pullups',      name: 'Dominadas',          sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 4, reps: 8,  muscle: 'Hombros' },
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',      sets: 3, reps: 10, muscle: 'Brazos' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales', sets: 3, reps: 15, muscle: 'Hombros' },
-];
-
-// ── TORSO ──
-
-const TORSO_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 3, reps: 12, muscle: 'Pecho' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',     sets: 3, reps: 12, muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 3, reps: 12, muscle: 'Hombros' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales', sets: 3, reps: 15, muscle: 'Hombros' },
-];
-
-const TORSO_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 4, reps: 8,  muscle: 'Pecho' },
-  { id: 'ex_incline_bench',name: 'Press Inclinado',    sets: 3, reps: 10, muscle: 'Pecho' },
-  { id: 'ex_pullups',      name: 'Dominadas',          sets: 3, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',     sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 4, reps: 8,  muscle: 'Hombros' },
-];
-
-const TORSO_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_bench_press',  name: 'Press Banca',        sets: 5, reps: 5,  muscle: 'Pecho' },
-  { id: 'ex_incline_bench',name: 'Press Inclinado',    sets: 4, reps: 8,  muscle: 'Pecho' },
-  { id: 'ex_pullups',      name: 'Dominadas',          sets: 4, reps: 8,  muscle: 'Espalda' },
-  { id: 'ex_barbell_row',  name: 'Remo con Barra',     sets: 4, reps: 6,  muscle: 'Espalda' },
-  { id: 'ex_ohp',          name: 'Press Militar',      sets: 4, reps: 6,  muscle: 'Hombros' },
-  { id: 'ex_lateral_raise',name: 'Elevaciones Laterales', sets: 3, reps: 12, muscle: 'Hombros' },
-];
-
-// ── BRAZOS ──
-
-const ARMS_PRINCIPIANTE: PresetExerciseSimple[] = [
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 3, reps: 15, muscle: 'Brazos' },
-  { id: 'ex_french_press', name: 'Press Frances',   sets: 3, reps: 15, muscle: 'Brazos' },
-];
-
-const ARMS_INTERMEDIO: PresetExerciseSimple[] = [
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 4, reps: 10, muscle: 'Brazos' },
-  { id: 'ex_french_press', name: 'Press Frances',   sets: 4, reps: 10, muscle: 'Brazos' },
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho',  sets: 3, reps: 12, muscle: 'Espalda' },
-];
-
-const ARMS_AVANZADO: PresetExerciseSimple[] = [
-  { id: 'ex_barbell_curl', name: 'Curl de Biceps',  sets: 4, reps: 8,  muscle: 'Brazos' },
-  { id: 'ex_french_press', name: 'Press Frances',   sets: 4, reps: 8,  muscle: 'Brazos' },
-  { id: 'ex_lat_pulldown', name: 'Jalon al Pecho',  sets: 4, reps: 10, muscle: 'Espalda' },
-];
-
-// ── Categorías ──
-
-export const CATEGORIES: CategoryDef[] = [
+export const LEVELS: LevelInfo[] = [
   {
-    id: 'push', title: 'Push', icon: 'TrendingUp', color: '#EF4444',
-    desc: 'Empuje: pecho, hombros, triceps',
-    levels: [
-      { id: 'push-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~30 min', exercises: PUSH_PRINCIPIANTE },
-      { id: 'push-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~45 min', exercises: PUSH_INTERMEDIO },
-      { id: 'push-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~55 min', exercises: PUSH_AVANZADO },
+    level: 'principiante',
+    title: 'Principiante',
+    subtitle: 'Ideal si empiezas',
+    icon: '🌱',
+    color: '#10B981',
+  },
+  {
+    level: 'intermedio',
+    title: 'Intermedio',
+    subtitle: '3-12 meses de gym',
+    icon: '🔥',
+    color: '#F59E0B',
+  },
+  {
+    level: 'avanzado',
+    title: 'Avanzado',
+    subtitle: '+1 año entrenando',
+    icon: '💪',
+    color: '#EF4444',
+  },
+];
+
+export const WORKOUT_PRESETS: WorkoutPreset[] = [
+  // ─── PRINCIPIANTE ───
+  {
+    id: 'preset_beginner_fullbody',
+    name: 'Full Body Inicial',
+    description: 'Entreno completo para empezar. Trabaja todos los grupos musculares con ejercicios básicos.',
+    level: 'principiante',
+    icon: '🏋️',
+    color: '#10B981',
+    estimatedMinutes: 40,
+    exercises: [
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8 },
+      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30 },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 12 },
     ],
   },
   {
-    id: 'pull', title: 'Pull', icon: 'BarChart3', color: '#3B82F6',
-    desc: 'Tiron: espalda, biceps',
-    levels: [
-      { id: 'pull-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~25 min', exercises: PULL_PRINCIPIANTE },
-      { id: 'pull-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~40 min', exercises: PULL_INTERMEDIO },
-      { id: 'pull-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~55 min', exercises: PULL_AVANZADO },
+    id: 'preset_beginner_lower',
+    name: 'Piernas y Core',
+    description: 'Enfocado en tren inferior y abdominales. Perfecto para alternar con full body.',
+    level: 'principiante',
+    icon: '🦵',
+    color: '#10B981',
+    estimatedMinutes: 35,
+    exercises: [
+      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_lunges', exerciseName: 'Zancadas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_glute_bridge', exerciseName: 'Puente de Glúteos', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 15 },
+      { exerciseId: 'ex_crunch', exerciseName: 'Crunch Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 15 },
+      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30 },
+      { exerciseId: 'ex_leg_raise', exerciseName: 'Elevación de Piernas', muscleGroup: 'Core', defaultSets: 2, defaultReps: 12 },
     ],
   },
   {
-    id: 'piernas', title: 'Piernas', icon: 'Dumbbell', color: '#22C55E',
-    desc: 'Cuadriceps, femoral, gemelos, gluteo',
-    levels: [
-      { id: 'legs-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~25 min', exercises: LEGS_PRINCIPIANTE },
-      { id: 'legs-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~40 min', exercises: LEGS_INTERMEDIO },
-      { id: 'legs-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~50 min', exercises: LEGS_AVANZADO },
+    id: 'preset_beginner_upper',
+    name: 'Tren Superior Básico',
+    description: 'Pecho, espalda y hombros con ejercicios guiados. Técnica primero.',
+    level: 'principiante',
+    icon: '🎯',
+    color: '#10B981',
+    estimatedMinutes: 35,
+    exercises: [
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8 },
+      { exerciseId: 'ex_db_fly', exerciseName: 'Aperturas con Mancuernas', muscleGroup: 'Pecho', defaultSets: 2, defaultReps: 12 },
+      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 15 },
+    ],
+  },
+
+  // ─── INTERMEDIO ───
+  {
+    id: 'preset_intermediate_pushpull',
+    name: 'Push-Pull',
+    description: 'Empuje y tracción en un solo entreno. Alta intensidad para ganar fuerza.',
+    level: 'intermedio',
+    icon: '⚡',
+    color: '#F59E0B',
+    estimatedMinutes: 50,
+    exercises: [
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8 },
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15 },
     ],
   },
   {
-    id: 'fullbody', title: 'Full Body', icon: 'Flame', color: '#F97316',
-    desc: 'Cuerpo completo en una sesion',
-    levels: [
-      { id: 'fb-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~35 min', exercises: FB_PRINCIPIANTE },
-      { id: 'fb-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~50 min', exercises: FB_INTERMEDIO },
-      { id: 'fb-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~65 min', exercises: FB_AVANZADO },
+    id: 'preset_intermediate_legs',
+    name: 'Pierna Intensa',
+    description: 'Sentadilla + peso muerto en la misma sesión. Para piernas fuertes.',
+    level: 'intermedio',
+    icon: '🏔️',
+    color: '#F59E0B',
+    estimatedMinutes: 55,
+    exercises: [
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 6 },
+      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_quad_extension', exerciseName: 'Extension de Cuadriceps', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_curl_femoral', exerciseName: 'Curl Femoral', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_calf_press', exerciseName: 'Gemelos en Prensa', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 15 },
     ],
   },
   {
-    id: 'torso', title: 'Torso', icon: 'Target', color: '#A855F7',
-    desc: 'Upper body: pecho + espalda + hombros',
-    levels: [
-      { id: 'torso-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~30 min', exercises: TORSO_PRINCIPIANTE },
-      { id: 'torso-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~45 min', exercises: TORSO_INTERMEDIO },
-      { id: 'torso-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~55 min', exercises: TORSO_AVANZADO },
+    id: 'preset_intermediate_hypertrophy',
+    name: 'Hipertrofia',
+    description: 'Volumen alto con ejercicios de aislamiento. Para ganar masa muscular.',
+    level: 'intermedio',
+    icon: '🎯',
+    color: '#F59E0B',
+    estimatedMinutes: 55,
+    exercises: [
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10 },
+      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 10 },
+      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15 },
+      { exerciseId: 'ex_hummer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_arnold_press', exerciseName: 'Press Arnold', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_pec_deck', exerciseName: 'Peck Deck', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 12 },
+    ],
+  },
+
+  // ─── AVANZADO ───
+  {
+    id: 'preset_advanced_power',
+    name: 'Fuerza Total',
+    description: 'Los 3 grandes + accesorios. Bajo volumen, máxima intensidad.',
+    level: 'avanzado',
+    icon: '🏆',
+    color: '#EF4444',
+    estimatedMinutes: 65,
+    exercises: [
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 5, defaultReps: 5 },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 5, defaultReps: 5 },
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 5 },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 6 },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8 },
+      { exerciseId: 'ex_dips', exerciseName: 'Fondos', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 10 },
     ],
   },
   {
-    id: 'brazos', title: 'Brazos', icon: 'Zap', color: '#EAB308',
-    desc: 'Biceps y triceps',
-    levels: [
-      { id: 'arms-principiante', label: 'Principiante', badge: 'Facil',  color: '#22C55E', time: '~15 min', exercises: ARMS_PRINCIPIANTE },
-      { id: 'arms-intermedio',   label: 'Intermedio',   badge: 'Medio',  color: '#F97316', time: '~25 min', exercises: ARMS_INTERMEDIO },
-      { id: 'arms-avanzado',     label: 'Avanzado',     badge: 'Dificil',color: '#EF4444', time: '~35 min', exercises: ARMS_AVANZADO },
+    id: 'preset_advanced_split',
+    name: 'Push Avanzado',
+    description: 'Empuje de alto volumen. Pecho, hombro y tríceps al límite.',
+    level: 'avanzado',
+    icon: '🔴',
+    color: '#EF4444',
+    estimatedMinutes: 60,
+    exercises: [
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10 },
+      { exerciseId: 'ex_decline_bench', exerciseName: 'Press Banca Declinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15 },
+      { exerciseId: 'ex_french_press', exerciseName: 'Press Francés', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+    ],
+  },
+  {
+    id: 'preset_advanced_pull',
+    name: 'Pull Avanzado',
+    description: 'Tracción intensa. Espalda, bíceps y antebrazo a fondo.',
+    level: 'avanzado',
+    icon: '🔵',
+    color: '#EF4444',
+    estimatedMinutes: 55,
+    exercises: [
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 6 },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
+      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15 },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 4, defaultReps: 10 },
+      { exerciseId: 'ex_hammer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
     ],
   },
 ];
 
-// ── Flat map for session/new quickStart lookup ──
+export function getPresetsByLevel(level: WorkoutLevel): WorkoutPreset[] {
+  return WORKOUT_PRESETS.filter((p) => p.level === level);
+}
 
-export const ALL_PRESETS: Record<string, { name: string; exercises: PresetExerciseSimple[] }> = {};
-for (const cat of CATEGORIES) {
-  for (const lvl of cat.levels) {
-    ALL_PRESETS[lvl.id] = { name: `${cat.title} ${lvl.label}`, exercises: lvl.exercises };
-  }
+export function getPresetById(id: string): WorkoutPreset | undefined {
+  return WORKOUT_PRESETS.find((p) => p.id === id);
 }
