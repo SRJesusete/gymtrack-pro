@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ScrollView, Alert } from 'react-native';
+import { ScrollView, Alert, Linking } from 'react-native';
 import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
   Input, Theme, toast, Spinner, BlinkDialog, Circle,
 } from '@blinkdotnew/mobile-ui';
-import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame, Clock, Target } from '@blinkdotnew/mobile-ui';
+import { Dumbbell, Plus, Trash2, Check, ArrowLeft, Save, Flame, Clock, Target, Youtube, Play } from '@blinkdotnew/mobile-ui';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -27,6 +27,7 @@ interface ExerciseData {
   exerciseName: string;
   muscleGroup: string;
   sets: SetData[];
+  videoUrl?: string;
 }
 
 export default function NewSessionScreen() {
@@ -50,6 +51,7 @@ export default function NewSessionScreen() {
         exerciseId: pe.exerciseId,
         exerciseName: pe.exerciseName,
         muscleGroup: pe.muscleGroup,
+        videoUrl: pe.videoUrl,
         sets: Array.from({ length: pe.defaultSets }, () => ({
           weight: '',
           reps: String(pe.defaultReps),
@@ -391,7 +393,21 @@ function ExerciseCard({
               </Card>
             )}
           </XStack>
-          <Paragraph size="$2" color="$color10">{exercise.muscleGroup}</Paragraph>
+          <XStack alignItems="center" gap="$3" marginTop="$1">
+            <Paragraph size="$2" color="$color10">{exercise.muscleGroup}</Paragraph>
+            {exercise.videoUrl && (
+              <Button
+                chromeless
+                size="$2"
+                onPress={() => Linking.openURL(exercise.videoUrl!)}
+              >
+                <XStack alignItems="center" gap="$1">
+                  <Youtube size={14} color="$red9" />
+                  <Paragraph size="$1" color="$red9" fontWeight="600">Ver video</Paragraph>
+                </XStack>
+              </Button>
+            )}
+          </XStack>
         </YStack>
         <Button chromeless onPress={onRemoveExercise} icon={<Trash2 size={18} color="$red9" />} />
       </XStack>

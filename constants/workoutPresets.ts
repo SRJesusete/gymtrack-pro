@@ -1,5 +1,5 @@
 // Workout presets organized by difficulty level
-// Each preset contains exercises from the DB with default sets/reps
+// Each preset contains exercises from the DB with default sets/reps and video tutorials
 
 export type WorkoutLevel = 'principiante' | 'intermedio' | 'avanzado';
 
@@ -9,6 +9,7 @@ export interface PresetExercise {
   muscleGroup: string;
   defaultSets: number;
   defaultReps: number;
+  videoUrl: string;
 }
 
 export interface WorkoutPreset {
@@ -16,8 +17,8 @@ export interface WorkoutPreset {
   name: string;
   description: string;
   level: WorkoutLevel;
-  icon: string; // muscle group focus emoji
-  color: string; // accent color for card
+  icon: string;
+  color: string;
   estimatedMinutes: number;
   exercises: PresetExercise[];
 }
@@ -65,12 +66,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#10B981',
     estimatedMinutes: 40,
     exercises: [
-      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8 },
-      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30 },
-      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 12 },
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/U3HlEF_E9fo' },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/rxD321l2svE' },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/G8l_8chR5BE' },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8, videoUrl: 'https://youtu.be/2yjwXTZQDDI' },
+      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30, videoUrl: 'https://youtu.be/pSHjTRCQxIw' },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 12, videoUrl: 'https://youtu.be/kwG2ipFRgfo' },
     ],
   },
   {
@@ -82,12 +83,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#10B981',
     estimatedMinutes: 35,
     exercises: [
-      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_lunges', exerciseName: 'Zancadas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_glute_bridge', exerciseName: 'Puente de Glúteos', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 15 },
-      { exerciseId: 'ex_crunch', exerciseName: 'Crunch Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 15 },
-      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30 },
-      { exerciseId: 'ex_leg_raise', exerciseName: 'Elevación de Piernas', muscleGroup: 'Core', defaultSets: 2, defaultReps: 12 },
+      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/IZxyjW7MPJQ' },
+      { exerciseId: 'ex_lunges', exerciseName: 'Zancadas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/QOVaHwm-Q6U' },
+      { exerciseId: 'ex_glute_bridge', exerciseName: 'Puente de Glúteos', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 15, videoUrl: 'https://youtu.be/wPM8icPu6H8' },
+      { exerciseId: 'ex_crunch', exerciseName: 'Crunch Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 15, videoUrl: 'https://youtu.be/Xyd_fa5zoEU' },
+      { exerciseId: 'ex_plank', exerciseName: 'Plancha Abdominal', muscleGroup: 'Core', defaultSets: 3, defaultReps: 30, videoUrl: 'https://youtu.be/pSHjTRCQxIw' },
+      { exerciseId: 'ex_leg_raise', exerciseName: 'Elevación de Piernas', muscleGroup: 'Core', defaultSets: 2, defaultReps: 12, videoUrl: 'https://youtu.be/JB2oyawG9KI' },
     ],
   },
   {
@@ -99,12 +100,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#10B981',
     estimatedMinutes: 35,
     exercises: [
-      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8 },
-      { exerciseId: 'ex_db_fly', exerciseName: 'Aperturas con Mancuernas', muscleGroup: 'Pecho', defaultSets: 2, defaultReps: 12 },
-      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 15 },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/rxD321l2svE' },
+      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/CAwf7n6Luuc' },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 8, videoUrl: 'https://youtu.be/2yjwXTZQDDI' },
+      { exerciseId: 'ex_db_fly', exerciseName: 'Aperturas con Mancuernas', muscleGroup: 'Pecho', defaultSets: 2, defaultReps: 12, videoUrl: 'https://youtu.be/eozdVDA78K0' },
+      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/pYcpY20QaE8' },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 2, defaultReps: 15, videoUrl: 'https://youtu.be/kwG2ipFRgfo' },
     ],
   },
 
@@ -118,12 +119,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#F59E0B',
     estimatedMinutes: 50,
     exercises: [
-      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8 },
-      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15 },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/rxD321l2svE' },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/G8l_8chR5BE' },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/2yjwXTZQDDI' },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8, videoUrl: 'https://youtu.be/eGo4IYlbE5g' },
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/SrqOu55lrY0' },
+      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15, videoUrl: 'https://youtu.be/HSoHeSjvIdY' },
     ],
   },
   {
@@ -135,12 +136,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#F59E0B',
     estimatedMinutes: 55,
     exercises: [
-      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 6 },
-      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_quad_extension', exerciseName: 'Extension de Cuadriceps', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_curl_femoral', exerciseName: 'Curl Femoral', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_calf_press', exerciseName: 'Gemelos en Prensa', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 15 },
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/U3HlEF_E9fo' },
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 6, videoUrl: 'https://youtu.be/ytGaGIn3SjE' },
+      { exerciseId: 'ex_leg_press', exerciseName: 'Prensa de Piernas', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/IZxyjW7MPJQ' },
+      { exerciseId: 'ex_quad_extension', exerciseName: 'Extension de Cuadriceps', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/YyvSfVjQeL0' },
+      { exerciseId: 'ex_curl_femoral', exerciseName: 'Curl Femoral', muscleGroup: 'Piernas', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/1Tq3QdYUuHs' },
+      { exerciseId: 'ex_calf_press', exerciseName: 'Gemelos en Prensa', muscleGroup: 'Piernas', defaultSets: 4, defaultReps: 15, videoUrl: 'https://youtu.be/JbyjNymZOt0' },
     ],
   },
   {
@@ -152,13 +153,13 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#F59E0B',
     estimatedMinutes: 55,
     exercises: [
-      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10 },
-      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 10 },
-      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15 },
-      { exerciseId: 'ex_hummer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_arnold_press', exerciseName: 'Press Arnold', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_pec_deck', exerciseName: 'Peck Deck', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10, videoUrl: 'https://youtu.be/SrqOu55lrY0' },
+      { exerciseId: 'ex_dumbbell_row', exerciseName: 'Remo con Mancuerna', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 10, videoUrl: 'https://youtu.be/pYcpY20QaE8' },
+      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15, videoUrl: 'https://youtu.be/3VcKaXpzqRo' },
+      { exerciseId: 'ex_hammer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/zC3nLlEvin4' },
+      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/2-LAMcpzODU' },
+      { exerciseId: 'ex_arnold_press', exerciseName: 'Press Arnold', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/6Z15_WdXadw' },
+      { exerciseId: 'ex_pec_deck', exerciseName: 'Peck Deck', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/tGXIQR89-JE' },
     ],
   },
 
@@ -172,12 +173,12 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#EF4444',
     estimatedMinutes: 65,
     exercises: [
-      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 5, defaultReps: 5 },
-      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 5, defaultReps: 5 },
-      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 5 },
-      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 6 },
-      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8 },
-      { exerciseId: 'ex_dips', exerciseName: 'Fondos', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 10 },
+      { exerciseId: 'ex_squat', exerciseName: 'Sentadilla', muscleGroup: 'Piernas', defaultSets: 5, defaultReps: 5, videoUrl: 'https://youtu.be/U3HlEF_E9fo' },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 5, defaultReps: 5, videoUrl: 'https://youtu.be/rxD321l2svE' },
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 5, videoUrl: 'https://youtu.be/ytGaGIn3SjE' },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 6, videoUrl: 'https://youtu.be/2yjwXTZQDDI' },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 8, videoUrl: 'https://youtu.be/eGo4IYlbE5g' },
+      { exerciseId: 'ex_dips', exerciseName: 'Fondos', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/0326dy_-CzM' },
     ],
   },
   {
@@ -189,13 +190,13 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#EF4444',
     estimatedMinutes: 60,
     exercises: [
-      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10 },
-      { exerciseId: 'ex_decline_bench', exerciseName: 'Press Banca Declinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15 },
-      { exerciseId: 'ex_french_press', exerciseName: 'Press Francés', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
-      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_bench_press', exerciseName: 'Press Banca', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/rxD321l2svE' },
+      { exerciseId: 'ex_incline_bench', exerciseName: 'Press Banca Inclinado', muscleGroup: 'Pecho', defaultSets: 4, defaultReps: 10, videoUrl: 'https://youtu.be/SrqOu55lrY0' },
+      { exerciseId: 'ex_decline_bench', exerciseName: 'Press Banca Declinado', muscleGroup: 'Pecho', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/LfyQBUKR8SE' },
+      { exerciseId: 'ex_ohp', exerciseName: 'Press Militar', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/2yjwXTZQDDI' },
+      { exerciseId: 'ex_lateral_raise', exerciseName: 'Elevaciones Laterales', muscleGroup: 'Hombros', defaultSets: 4, defaultReps: 15, videoUrl: 'https://youtu.be/3VcKaXpzqRo' },
+      { exerciseId: 'ex_french_press', exerciseName: 'Press Francés', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/d_KZxkY_0cM' },
+      { exerciseId: 'ex_tricep_pushdown', exerciseName: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/2-LAMcpzODU' },
     ],
   },
   {
@@ -207,13 +208,13 @@ export const WORKOUT_PRESETS: WorkoutPreset[] = [
     color: '#EF4444',
     estimatedMinutes: 55,
     exercises: [
-      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 6 },
-      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8 },
-      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10 },
-      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15 },
-      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 4, defaultReps: 10 },
-      { exerciseId: 'ex_hammer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12 },
+      { exerciseId: 'ex_deadlift', exerciseName: 'Peso Muerto', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 6, videoUrl: 'https://youtu.be/ytGaGIn3SjE' },
+      { exerciseId: 'ex_pullups', exerciseName: 'Dominadas', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/eGo4IYlbE5g' },
+      { exerciseId: 'ex_barbell_row', exerciseName: 'Remo con Barra', muscleGroup: 'Espalda', defaultSets: 4, defaultReps: 8, videoUrl: 'https://youtu.be/G8l_8chR5BE' },
+      { exerciseId: 'ex_lat_pulldown', exerciseName: 'Jalón al Pecho', muscleGroup: 'Espalda', defaultSets: 3, defaultReps: 10, videoUrl: 'https://youtu.be/CAwf7n6Luuc' },
+      { exerciseId: 'ex_face_pull', exerciseName: 'Face Pull', muscleGroup: 'Hombros', defaultSets: 3, defaultReps: 15, videoUrl: 'https://youtu.be/HSoHeSjvIdY' },
+      { exerciseId: 'ex_barbell_curl', exerciseName: 'Curl de Bíceps', muscleGroup: 'Brazos', defaultSets: 4, defaultReps: 10, videoUrl: 'https://youtu.be/kwG2ipFRgfo' },
+      { exerciseId: 'ex_hammer_curl', exerciseName: 'Martillo', muscleGroup: 'Brazos', defaultSets: 3, defaultReps: 12, videoUrl: 'https://youtu.be/zC3nLlEvin4' },
     ],
   },
 ];
