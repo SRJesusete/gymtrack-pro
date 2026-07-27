@@ -42,7 +42,7 @@ function SimpleLineChart({ data, color }: { data: VolumePoint[]; color: string }
     y: CHART_PADDING.top + CHART_INNER_H - (d.volume / maxVol) * CHART_INNER_H,
   }));
 
-  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const linePoints = points.map((p) => `${p.x},${p.y}`).join(' ');
 
   // Y-axis ticks
   const yTicks = [0, Math.round(maxVol / 2), Math.round(maxVol)];
@@ -82,7 +82,7 @@ function SimpleLineChart({ data, color }: { data: VolumePoint[]; color: string }
       />
 
       {/* Line */}
-      <Polyline points={pathD} fill="none" stroke={color} strokeWidth={2.5} />
+      <Polyline points={linePoints} fill="none" stroke={color} strokeWidth={2.5} />
 
       {/* Data points */}
       {points.map((p, i) => (
