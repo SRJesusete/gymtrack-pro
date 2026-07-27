@@ -37,5 +37,5 @@
 - DONE (2026-07-27 P2): Edit workout date + filter calendar by type (type encoded in `notes` via `::tipo=` since Blink sessions schema is fixed). Colored chips/dots/badges.
 - DONE (2026-07-27 P2): Oswald headings + Manrope body (Google Fonts CDN in `app/_layout.tsx`).
 - DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos).
-- P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian.
+- DONE (2026-07-27 P1): Restyled History, Templates, Progress, and Session (new/[id]) screens to Volt/Obsidian palette (token swap $color*/$orange9 -> `C`) + Oswald/Manrope (global). Muscle-group/PR/warmup accents kept as color variety. Verified render, no errors.
 - DONE (2026-07-27 P2): Reused TypeDistribution chart on Progreso (`components/TypeDistribution.tsx`, metric="volume" all-time). Verified.

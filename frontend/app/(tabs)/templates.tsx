@@ -8,6 +8,7 @@ import { ClipboardList, Plus, Play, Trash2, Dumbbell, ChevronRight, Info, X } fr
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useTemplates, useDeleteTemplate, useExercises, useCreateTemplate } from '@/hooks/useDatabase';
+import { C } from '@/constants/theme';
 
 const CATEGORIES: { key: string; label: string; icon: string }[] = [
   { key: 'all', label: 'Todas', icon: 'all' },
@@ -142,8 +143,8 @@ export default function TemplatesScreen() {
   if (authLoading) {
     return (
       <Theme name="dark">
-        <YStack flex={1} backgroundColor="$color1" justifyContent="center" alignItems="center">
-          <Spinner size="large" color="$color9" />
+        <YStack flex={1} backgroundColor={C.bg} justifyContent="center" alignItems="center">
+          <Spinner size="large" color={C.volt} />
         </YStack>
       </Theme>
     );
@@ -151,12 +152,12 @@ export default function TemplatesScreen() {
 
   return (
     <Theme name="dark">
-      <YStack flex={1} backgroundColor="$color1">
+      <YStack flex={1} backgroundColor={C.bg}>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Header */}
           <YStack padding="$4" paddingTop="$6" gap="$2">
-            <H2 color="$color12" fontWeight="800">Plantillas</H2>
-            <Paragraph color="$color10">
+            <H2 color={C.text} fontWeight="800">Plantillas</H2>
+            <Paragraph color={C.sub}>
               {templates?.length || 0} plantillas de entrenamiento
             </Paragraph>
           </YStack>
@@ -175,12 +176,12 @@ export default function TemplatesScreen() {
                   paddingHorizontal="$4"
                   paddingVertical="$2"
                   borderRadius="$6"
-                  backgroundColor={selectedCat === cat.key ? '$color9' : '$color3'}
+                  backgroundColor={selectedCat === cat.key ? C.volt : C.elevated}
                   onPress={() => setSelectedCat(cat.key)}
                 >
                   <Paragraph
                     fontWeight="600"
-                    color={selectedCat === cat.key ? 'white' : '$color11'}
+                    color={selectedCat === cat.key ? 'white' : C.sub}
                     size="$2"
                   >
                     {cat.label}
@@ -193,12 +194,12 @@ export default function TemplatesScreen() {
           {/* Templates List */}
           {isLoading ? (
             <YStack padding="$8" alignItems="center">
-              <Spinner size="large" color="$color9" />
+              <Spinner size="large" color={C.volt} />
             </YStack>
           ) : filtered.length === 0 ? (
             <YStack padding="$8" alignItems="center" gap="$3">
-              <ClipboardList size={48} color="$color6" />
-              <Paragraph color="$color10" textAlign="center">
+              <ClipboardList size={48} color={C.muted} />
+              <Paragraph color={C.sub} textAlign="center">
                 {selectedCat === 'all'
                   ? 'No hay plantillas aún. ¡Crea la primera!'
                   : `No hay plantillas en la categoría seleccionada`}
@@ -209,7 +210,7 @@ export default function TemplatesScreen() {
               {Object.entries(grouped).map(([category, catTemplates]) => (
                 <YStack key={category} gap="$2">
                   <XStack alignItems="center" gap="$2">
-                    <Paragraph color="$color11" fontWeight="700" size="$3">
+                    <Paragraph color={C.sub} fontWeight="700" size="$3">
                       {category}
                     </Paragraph>
                     <Divider flex={1} />
@@ -222,15 +223,15 @@ export default function TemplatesScreen() {
                       bordered
                       padding="$4"
                       borderRadius="$4"
-                      backgroundColor="$color2"
+                      backgroundColor={C.surface}
                     >
                       <XStack justifyContent="space-between" alignItems="flex-start">
                         <YStack flex={1} gap="$1">
-                          <Paragraph fontWeight="700" color="$color12">{tpl.name}</Paragraph>
+                          <Paragraph fontWeight="700" color={C.text}>{tpl.name}</Paragraph>
                           {tpl.description ? (
-                            <Paragraph size="$2" color="$color10">{tpl.description}</Paragraph>
+                            <Paragraph size="$2" color={C.sub}>{tpl.description}</Paragraph>
                           ) : null}
-                          <Paragraph size="$1" color="$color9">
+                          <Paragraph size="$1" color={C.volt}>
                             {new Date(tpl.createdAt).toLocaleDateString('es-ES', {
                               day: 'numeric', month: 'short',
                             })}
@@ -246,7 +247,7 @@ export default function TemplatesScreen() {
                           <Button
                             chromeless
                             onPress={() => handleDelete(tpl.id, tpl.name)}
-                            icon={<Trash2 size={16} color="$red9" />}
+                            icon={<Trash2 size={16} color={C.danger} />}
                           />
                         </XStack>
                       </XStack>
@@ -261,7 +262,7 @@ export default function TemplatesScreen() {
         {/* FAB: Create Template */}
         <YStack position="absolute" bottom={24} right={24}>
           <Button
-            theme="active"
+            backgroundColor={C.volt} color="#000000" fontWeight="800"
             circular
             size="$6"
             onPress={() => setShowCreator(true)}
@@ -293,21 +294,21 @@ export default function TemplatesScreen() {
 
               {/* Selected Exercises */}
               {creatorExercises.map((ce, idx) => (
-                <Card key={ce.exerciseId} bordered padding="$3" borderRadius="$3" backgroundColor="$color3">
+                <Card key={ce.exerciseId} bordered padding="$3" borderRadius="$3" backgroundColor={C.elevated}>
                   <XStack justifyContent="space-between" alignItems="center" marginBottom="$2">
                     <YStack flex={1}>
-                      <Paragraph fontWeight="600" color="$color12">{ce.exerciseName}</Paragraph>
-                      <Paragraph size="$2" color="$color10">{ce.muscleGroup}</Paragraph>
+                      <Paragraph fontWeight="600" color={C.text}>{ce.exerciseName}</Paragraph>
+                      <Paragraph size="$2" color={C.sub}>{ce.muscleGroup}</Paragraph>
                     </YStack>
                     <Button
                       chromeless
                       onPress={() => removeCreatorExercise(idx)}
-                      icon={<X size={16} color="$red9" />}
+                      icon={<X size={16} color={C.danger} />}
                     />
                   </XStack>
                   <XStack gap="$2">
                     <YStack flex={1}>
-                      <Paragraph size="$1" color="$color10" marginBottom="$1">Series</Paragraph>
+                      <Paragraph size="$1" color={C.sub} marginBottom="$1">Series</Paragraph>
                       <Input
                         size="$3"
                         keyboardType="number-pad"
@@ -316,7 +317,7 @@ export default function TemplatesScreen() {
                       />
                     </YStack>
                     <YStack flex={1}>
-                      <Paragraph size="$1" color="$color10" marginBottom="$1">Reps</Paragraph>
+                      <Paragraph size="$1" color={C.sub} marginBottom="$1">Reps</Paragraph>
                       <Input
                         size="$3"
                         keyboardType="number-pad"
@@ -341,7 +342,7 @@ export default function TemplatesScreen() {
               {/* Exercise Picker inside dialog */}
               {showExercisePicker && (
                 <YStack gap="$2" marginTop="$2">
-                  <Paragraph color="$color11" fontWeight="600">Selecciona un ejercicio:</Paragraph>
+                  <Paragraph color={C.sub} fontWeight="600">Selecciona un ejercicio:</Paragraph>
                   <ScrollView style={{ maxHeight: 250 }}>
                     <YStack gap="$1">
                       {(exerciseList || []).map((ex) => (
@@ -355,11 +356,11 @@ export default function TemplatesScreen() {
                         >
                           <XStack justifyContent="space-between" alignItems="center">
                             <YStack>
-                              <Paragraph fontWeight="600" color="$color12">{ex.name}</Paragraph>
-                              <Paragraph size="$2" color="$color10">{ex.muscleGroup}</Paragraph>
+                              <Paragraph fontWeight="600" color={C.text}>{ex.name}</Paragraph>
+                              <Paragraph size="$2" color={C.sub}>{ex.muscleGroup}</Paragraph>
                             </YStack>
                             {creatorExercises.some((ce) => ce.exerciseId === ex.id) && (
-                              <Paragraph size="$2" color="$green9">Añadido</Paragraph>
+                              <Paragraph size="$2" color={C.success}>Añadido</Paragraph>
                             )}
                           </XStack>
                         </Card>
@@ -372,7 +373,7 @@ export default function TemplatesScreen() {
               {/* Create Button */}
               {creatorExercises.length > 0 && (
                 <Button
-                  theme="active"
+                  backgroundColor={C.volt} color="#000000" fontWeight="800"
                   width="100%"
                   onPress={handleCreateTemplate}
                   disabled={creating}

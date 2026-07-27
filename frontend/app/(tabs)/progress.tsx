@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useSessionWithExercises, usePersonalRecords } from '@/hooks/useDatabase';
 import type { Session, SessionWithExercises } from '@/types';
 import { TypeDistribution } from '@/components/TypeDistribution';
+import { C } from '@/constants/theme';
 
 const CHART_WIDTH = Dimensions.get('window').width - 64;
 const CHART_HEIGHT = 200;
@@ -190,8 +191,8 @@ export default function ProgressScreen() {
   if (authLoading) {
     return (
       <Theme name="dark">
-        <YStack flex={1} backgroundColor="$color1" justifyContent="center" alignItems="center">
-          <Spinner size="large" color="$color9" />
+        <YStack flex={1} backgroundColor={C.bg} justifyContent="center" alignItems="center">
+          <Spinner size="large" color={C.volt} />
         </YStack>
       </Theme>
     );
@@ -200,15 +201,15 @@ export default function ProgressScreen() {
   if (!user) {
     return (
       <Theme name="dark">
-        <YStack flex={1} backgroundColor="$color1">
+        <YStack flex={1} backgroundColor={C.bg}>
           <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
             <YStack padding="$4" paddingTop="$6" gap="$2">
-              <H2 color="$color12" fontWeight="800">Progreso</H2>
-              <Paragraph color="$color10">Inicia sesión para ver tus estadísticas</Paragraph>
+              <H2 color={C.text} fontWeight="800">Progreso</H2>
+              <Paragraph color={C.sub}>Inicia sesión para ver tus estadísticas</Paragraph>
             </YStack>
             <YStack padding="$8" alignItems="center" gap="$3">
-              <BarChart3 size={48} color="$color6" />
-              <Paragraph color="$color10" textAlign="center">
+              <BarChart3 size={48} color={C.muted} />
+              <Paragraph color={C.sub} textAlign="center">
                 Registra entrenamientos para ver tu evolución
               </Paragraph>
             </YStack>
@@ -223,12 +224,12 @@ export default function ProgressScreen() {
 
   return (
     <Theme name="dark">
-      <YStack flex={1} backgroundColor="$color1">
+      <YStack flex={1} backgroundColor={C.bg}>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Header */}
           <YStack padding="$4" paddingTop="$6" gap="$2">
-            <H2 color="$color12" fontWeight="800">Progreso</H2>
-            <Paragraph color="$color10">
+            <H2 color={C.text} fontWeight="800">Progreso</H2>
+            <Paragraph color={C.sub}>
               Volumen acumulado a lo largo del tiempo
             </Paragraph>
           </YStack>
@@ -245,12 +246,12 @@ export default function ProgressScreen() {
                 paddingHorizontal="$4"
                 paddingVertical="$2"
                 borderRadius="$6"
-                backgroundColor={selectedGroup === null ? '$color9' : '$color3'}
+                backgroundColor={selectedGroup === null ? C.volt : C.elevated}
                 onPress={() => setSelectedGroup(null)}
               >
                 <Paragraph
                   fontWeight="600"
-                  color={selectedGroup === null ? 'white' : '$color11'}
+                  color={selectedGroup === null ? 'white' : C.sub}
                   size="$2"
                 >
                   Total
@@ -263,12 +264,12 @@ export default function ProgressScreen() {
                   paddingHorizontal="$4"
                   paddingVertical="$2"
                   borderRadius="$6"
-                  backgroundColor={selectedGroup === group ? MUSCLE_COLORS[group] : '$color3'}
+                  backgroundColor={selectedGroup === group ? MUSCLE_COLORS[group] : C.elevated}
                   onPress={() => setSelectedGroup(group)}
                 >
                   <Paragraph
                     fontWeight="600"
-                    color={selectedGroup === group ? 'white' : '$color11'}
+                    color={selectedGroup === group ? 'white' : C.sub}
                     size="$2"
                   >
                     {group}
@@ -282,22 +283,22 @@ export default function ProgressScreen() {
           <YStack padding="$4">
             {ssLoading ? (
               <YStack padding="$8" alignItems="center">
-                <Spinner size="large" color="$color9" />
+                <Spinner size="large" color={C.volt} />
               </YStack>
             ) : chartData.length === 0 ? (
-              <Card bordered padding="$6" borderRadius="$4" backgroundColor="$color2" alignItems="center" gap="$3">
-                <TrendingUp size={48} color="$color6" />
-                <Paragraph color="$color10" textAlign="center">
+              <Card bordered padding="$6" borderRadius="$4" backgroundColor={C.surface} alignItems="center" gap="$3">
+                <TrendingUp size={48} color={C.muted} />
+                <Paragraph color={C.sub} textAlign="center">
                   Registra entrenamientos para ver tu gráfico de volumen
                 </Paragraph>
               </Card>
             ) : (
-              <Card bordered padding="$3" borderRadius="$4" backgroundColor="$color2">
+              <Card bordered padding="$3" borderRadius="$4" backgroundColor={C.surface}>
                 <SimpleLineChart
                   data={chartData}
                   color={MUSCLE_COLORS[activeGroup] || '#F97316'}
                 />
-                <Paragraph size="$2" color="$color10" textAlign="center" marginTop="$2">
+                <Paragraph size="$2" color={C.sub} textAlign="center" marginTop="$2">
                   Volumen acumulado (kg) · {activeGroup === 'all' ? 'Todos los grupos' : activeGroup}
                 </Paragraph>
               </Card>
@@ -314,7 +315,7 @@ export default function ProgressScreen() {
           {/* Personal Records */}
           {records && records.length > 0 && (
             <YStack padding="$4" gap="$3">
-              <H3 color="$color12">Records Personales</H3>
+              <H3 color={C.text}>Records Personales</H3>
               <YStack gap="$2">
                 {records.slice(0, 8).map((pr) => (
                   <Card
@@ -322,18 +323,18 @@ export default function ProgressScreen() {
                     bordered
                     padding="$3"
                     borderRadius="$4"
-                    backgroundColor="$color2"
+                    backgroundColor={C.surface}
                   >
                     <XStack justifyContent="space-between" alignItems="center">
                       <YStack gap="$1">
-                        <Paragraph fontWeight="700" color="$color12">{pr.exerciseName}</Paragraph>
-                        <Paragraph size="$2" color="$color10">
+                        <Paragraph fontWeight="700" color={C.text}>{pr.exerciseName}</Paragraph>
+                        <Paragraph size="$2" color={C.sub}>
                           {new Date(pr.achievedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                         </Paragraph>
                       </YStack>
                       <XStack gap="$2" alignItems="center">
-                        <Award size={16} color="$orange9" />
-                        <Paragraph color="$orange9" fontWeight="800">{pr.prValue} kg</Paragraph>
+                        <Award size={16} color={C.volt} />
+                        <Paragraph color={C.volt} fontWeight="800">{pr.prValue} kg</Paragraph>
                       </XStack>
                     </XStack>
                   </Card>
@@ -345,29 +346,29 @@ export default function ProgressScreen() {
           {/* Stats Summary */}
           {sessions && sessions.length > 0 && (
             <YStack padding="$4" gap="$3">
-              <H3 color="$color12">Resumen</H3>
+              <H3 color={C.text}>Resumen</H3>
               <XStack gap="$3" flexWrap="wrap">
-                <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2" flex={1} minWidth={140}>
+                <Card bordered padding="$4" borderRadius="$4" backgroundColor={C.surface} flex={1} minWidth={140}>
                   <YStack alignItems="center" gap="$1">
-                    <Dumbbell size={20} color="$color9" />
-                    <H4 color="$color12" fontWeight="800">{sessions.length}</H4>
-                    <Paragraph size="$2" color="$color10">Sesiones</Paragraph>
+                    <Dumbbell size={20} color={C.volt} />
+                    <H4 color={C.text} fontWeight="800">{sessions.length}</H4>
+                    <Paragraph size="$2" color={C.sub}>Sesiones</Paragraph>
                   </YStack>
                 </Card>
-                <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2" flex={1} minWidth={140}>
+                <Card bordered padding="$4" borderRadius="$4" backgroundColor={C.surface} flex={1} minWidth={140}>
                   <YStack alignItems="center" gap="$1">
-                    <TrendingUp size={20} color="$green9" />
-                    <H4 color="$color12" fontWeight="800">
+                    <TrendingUp size={20} color={C.success} />
+                    <H4 color={C.text} fontWeight="800">
                       {sessions.reduce((sum, s) => sum + s.totalVolume, 0).toLocaleString()}
                     </H4>
-                    <Paragraph size="$2" color="$color10">kg totales</Paragraph>
+                    <Paragraph size="$2" color={C.sub}>kg totales</Paragraph>
                   </YStack>
                 </Card>
-                <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2" flex={1} minWidth={140}>
+                <Card bordered padding="$4" borderRadius="$4" backgroundColor={C.surface} flex={1} minWidth={140}>
                   <YStack alignItems="center" gap="$1">
-                    <Award size={20} color="$orange9" />
-                    <H4 color="$color12" fontWeight="800">{records?.length || 0}</H4>
-                    <Paragraph size="$2" color="$color10">PRs</Paragraph>
+                    <Award size={20} color={C.volt} />
+                    <H4 color={C.text} fontWeight="800">{records?.length || 0}</H4>
+                    <Paragraph size="$2" color={C.sub}>PRs</Paragraph>
                   </YStack>
                 </Card>
               </XStack>

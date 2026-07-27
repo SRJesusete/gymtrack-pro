@@ -15,6 +15,7 @@ import {
   getSuggestedWeight,
 } from '@/hooks/useDatabase';
 import { getPresetById, type WorkoutPreset } from '@/constants/workoutPresets';
+import { C } from '@/constants/theme';
 
 interface SetData {
   weight: string;
@@ -211,19 +212,19 @@ export default function NewSessionScreen() {
 
   return (
     <Theme name="dark">
-      <YStack flex={1} backgroundColor="$color1">
+      <YStack flex={1} backgroundColor={C.bg}>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Header */}
           <XStack padding="$4" paddingTop="$6" justifyContent="space-between" alignItems="center">
             <Button chromeless onPress={() => router.back()} icon={<ArrowLeft size={20} />} />
-            <H2 color="$color12" fontWeight="800">
+            <H2 color={C.text} fontWeight="800">
               {preset ? preset.name : 'Nuevo Entreno'}
             </H2>
             <Button
               chromeless
               onPress={handleSave}
               disabled={saving}
-              icon={saving ? <Spinner size="small" /> : <Save size={20} color="$color9" />}
+              icon={saving ? <Spinner size="small" /> : <Save size={20} color={C.volt} />}
             />
           </XStack>
 
@@ -234,32 +235,32 @@ export default function NewSessionScreen() {
                 bordered
                 padding="$3"
                 borderRadius="$4"
-                backgroundColor="$color2"
+                backgroundColor={C.surface}
               >
                 <XStack alignItems="center" gap="$3">
-                  <Circle size={44} backgroundColor="$color3">
+                  <Circle size={44} backgroundColor={C.elevated}>
                     <Paragraph size="$7">{preset.icon}</Paragraph>
                   </Circle>
                   <YStack flex={1} gap="$1">
-                    <Paragraph color="$color10" size="$2" numberOfLines={2}>
+                    <Paragraph color={C.sub} size="$2" numberOfLines={2}>
                       {preset.description}
                     </Paragraph>
                     <XStack gap="$4">
                       <XStack alignItems="center" gap="$1">
-                        <Clock size={12} color="$color10" />
-                        <Paragraph size="$1" color="$color10">
+                        <Clock size={12} color={C.sub} />
+                        <Paragraph size="$1" color={C.sub}>
                           ~{preset.estimatedMinutes} min
                         </Paragraph>
                       </XStack>
                       <XStack alignItems="center" gap="$1">
-                        <Dumbbell size={12} color="$color10" />
-                        <Paragraph size="$1" color="$color10">
+                        <Dumbbell size={12} color={C.sub} />
+                        <Paragraph size="$1" color={C.sub}>
                           {preset.exercises.length} ejercicios
                         </Paragraph>
                       </XStack>
                       <XStack alignItems="center" gap="$1">
-                        <Target size={12} color="$color10" />
-                        <Paragraph size="$1" color="$color10">
+                        <Target size={12} color={C.sub} />
+                        <Paragraph size="$1" color={C.sub}>
                           Nivel: {preset.level}
                         </Paragraph>
                       </XStack>
@@ -309,10 +310,10 @@ export default function NewSessionScreen() {
 
           {/* Volume Summary */}
           {exerciseData.length > 0 && (
-            <YStack padding="$4" backgroundColor="$color2" margin="$4" borderRadius="$4">
+            <YStack padding="$4" backgroundColor={C.surface} margin="$4" borderRadius="$4">
               <XStack justifyContent="space-between">
-                <Paragraph color="$color11" fontWeight="600">Volumen total estimado</Paragraph>
-                <Paragraph color="$color9" fontWeight="800">
+                <Paragraph color={C.sub} fontWeight="600">Volumen total estimado</Paragraph>
+                <Paragraph color={C.volt} fontWeight="800">
                   {calculateTotalVolume().toLocaleString()} kg
                 </Paragraph>
               </XStack>
@@ -339,10 +340,10 @@ export default function NewSessionScreen() {
                 >
                   <XStack justifyContent="space-between" alignItems="center">
                     <YStack>
-                      <Paragraph fontWeight="600" color="$color12">{ex.name}</Paragraph>
-                      <Paragraph size="$2" color="$color10">{ex.muscleGroup}</Paragraph>
+                      <Paragraph fontWeight="600" color={C.text}>{ex.name}</Paragraph>
+                      <Paragraph size="$2" color={C.sub}>{ex.muscleGroup}</Paragraph>
                     </YStack>
-                    <Plus size={16} color="$color9" />
+                    <Plus size={16} color={C.volt} />
                   </XStack>
                 </Card>
               ))}
@@ -384,12 +385,12 @@ function ExerciseCard({
       margin="$4"
       marginBottom="$1"
       borderRadius="$4"
-      backgroundColor="$color2"
+      backgroundColor={C.surface}
     >
       <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
         <YStack flex={1}>
           <XStack alignItems="center" gap="$2">
-            <H4 color="$color12">{exercise.exerciseName}</H4>
+            <H4 color={C.text}>{exercise.exerciseName}</H4>
             {pr && (
               <Card paddingHorizontal="$2" paddingVertical="$1" backgroundColor="$orange4" borderRadius="$2">
                 <Paragraph size="$1" color="$orange10" fontWeight="700">PR: {pr.prValue}kg</Paragraph>
@@ -397,7 +398,7 @@ function ExerciseCard({
             )}
           </XStack>
           <XStack alignItems="center" gap="$3" marginTop="$1">
-            <Paragraph size="$2" color="$color10">{exercise.muscleGroup}</Paragraph>
+            <Paragraph size="$2" color={C.sub}>{exercise.muscleGroup}</Paragraph>
             {exercise.videoUrl && (
               <Button
                 chromeless
@@ -405,22 +406,22 @@ function ExerciseCard({
                 onPress={() => Linking.openURL(exercise.videoUrl!)}
               >
                 <XStack alignItems="center" gap="$1">
-                  <Youtube size={14} color="$red9" />
-                  <Paragraph size="$1" color="$red9" fontWeight="600">Ver video</Paragraph>
+                  <Youtube size={14} color={C.danger} />
+                  <Paragraph size="$1" color={C.danger} fontWeight="600">Ver video</Paragraph>
                 </XStack>
               </Button>
             )}
           </XStack>
         </YStack>
-        <Button chromeless onPress={onRemoveExercise} icon={<Trash2 size={18} color="$red9" />} />
+        <Button chromeless onPress={onRemoveExercise} icon={<Trash2 size={18} color={C.danger} />} />
       </XStack>
 
       {/* Set Headers */}
       <XStack paddingHorizontal="$2" marginBottom="$1">
-        <Paragraph size="$1" color="$color10" width={40} fontWeight="600">Serie</Paragraph>
-        <Paragraph size="$1" color="$color10" flex={1} fontWeight="600">Peso (kg)</Paragraph>
-        <Paragraph size="$1" color="$color10" flex={1} fontWeight="600">Reps</Paragraph>
-        <Paragraph size="$1" color="$color10" width={60} fontWeight="600">Calent.</Paragraph>
+        <Paragraph size="$1" color={C.sub} width={40} fontWeight="600">Serie</Paragraph>
+        <Paragraph size="$1" color={C.sub} flex={1} fontWeight="600">Peso (kg)</Paragraph>
+        <Paragraph size="$1" color={C.sub} flex={1} fontWeight="600">Reps</Paragraph>
+        <Paragraph size="$1" color={C.sub} width={60} fontWeight="600">Calent.</Paragraph>
       </XStack>
 
       {/* Sets */}
@@ -430,11 +431,11 @@ function ExerciseCard({
           paddingVertical="$1"
           paddingHorizontal="$2"
           alignItems="center"
-          backgroundColor={set.isWarmup ? '$orange2' : 'transparent'}
+          backgroundColor={set.isWarmup ? C.elevated : 'transparent'}
           borderRadius="$3"
           gap="$1"
         >
-          <Paragraph color="$color10" width={40} fontWeight="600">{setIndex + 1}</Paragraph>
+          <Paragraph color={C.sub} width={40} fontWeight="600">{setIndex + 1}</Paragraph>
           <YStack flex={1}>
             <Input
               size="$3"
@@ -457,12 +458,12 @@ function ExerciseCard({
             chromeless
             size="$2"
             width={60}
-            backgroundColor={set.isWarmup ? '$orange6' : '$color3'}
+            backgroundColor={set.isWarmup ? '$orange6' : C.elevated}
             onPress={() => onToggleWarmup(setIndex)}
           >
-            <Flame size={14} color={set.isWarmup ? '$orange10' : '$color10'} />
+            <Flame size={14} color={set.isWarmup ? '$orange10' : C.sub} />
           </Button>
-          <Button chromeless onPress={() => onRemoveSet(setIndex)} icon={<Trash2 size={14} color="$color10" />} />
+          <Button chromeless onPress={() => onRemoveSet(setIndex)} icon={<Trash2 size={14} color={C.sub} />} />
         </XStack>
       ))}
 
@@ -503,10 +504,10 @@ function SuggestionBanner({
   const suggested = getSuggestedWeight(lastWeight, lastReps);
 
   return (
-    <Card padding="$3" backgroundColor="$green2" borderRadius="$3" marginTop="$2">
+    <Card padding="$3" backgroundColor={C.elevated} borderRadius="$3" marginTop="$2">
       <XStack alignItems="center" gap="$2">
-        <Dumbbell size={14} color="$green9" />
-        <Paragraph size="$2" color="$green11">
+        <Dumbbell size={14} color={C.success} />
+        <Paragraph size="$2" color={C.success}>
           {suggested > lastWeight
             ? `Sube a ${suggested} kg (sobrecarga progresiva)`
             : `Mantén ${lastWeight} kg y apunta a más reps`}
