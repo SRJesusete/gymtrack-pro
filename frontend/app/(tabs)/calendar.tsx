@@ -9,7 +9,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useQuickLogSession, useUpdateSession, useDeleteSession } from '@/hooks/useDatabase';
 import type { Session } from '@/types';
-import { C } from '@/constants/theme';
+import { C, FONT } from '@/constants/theme';
 
 const DAY_NAMES = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 const MONTH_NAMES = [
@@ -88,6 +88,21 @@ export default function CalendarScreen() {
 
   const monthDays = useMemo(() => getMonthDays(viewYear, viewMonth), [viewYear, viewMonth]);
   const weekDays = useMemo(() => getWeekDays(weekStart), [weekStart]);
+
+  const periodStats = useMemo(() => {
+    let count = 0, volume = 0, minutes = 0;
+    if (sessions) {
+      const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
+      for (const s of sessions) {
+        const d = new Date(s.startedAt);
+        const inRange = viewMode === 'month'
+          ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
+          : weekKeys.has(formatDateKey(d));
+        if (inRange) { count++; volume += s.totalVolume || 0; minutes += s.durationMinutes || 0; }
+      }
+    }
+    return { count, volume, minutes };
+  }, [sessions, viewMode, viewYear, viewMonth, weekDays]);
 
   const selectedSessions = useMemo(() => {
     if (!selectedDate) return [];
@@ -198,8 +213,8 @@ export default function CalendarScreen() {
         <ScrollView contentContainerStyle={{ paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
           {/* Header */}
           <YStack padding="$4" paddingTop="$6" gap="$2">
-            <H2 color={C.text} fontWeight="800">Calendario</H2>
-            <Paragraph color={C.sub}>
+            <H2 color={C.text} fontFamily={FONT.display} fontSize={34} letterSpacing={0.5} textTransform="uppercase">Calendario</H2>
+            <Paragraph color={C.sub} fontFamily={FONT.body}>
               {user ? 'Registra y revisa tus entrenos por día' : 'Inicia sesión para usar el calendario'}
             </Paragraph>
           </YStack>
@@ -230,12 +245,19 @@ export default function CalendarScreen() {
             </Button>
           </XStack>
 
+          {/* Period summary */}
+          <XStack paddingHorizontal="$4" gap="$2" marginBottom="$4" data-testid="calendar-summary">
+            <CalStat value={String(periodStats.count)} label={viewMode === 'month' ? 'ENTRENOS · MES' : 'ENTRENOS · SEM'} />
+            <CalStat value={periodStats.volume.toLocaleString()} label="KG TOTALES" />
+            <CalStat value={String(periodStats.minutes)} label="MINUTOS" />
+          </XStack>
+
           {viewMode === 'month' ? (
             <>
               {/* Month navigation */}
               <XStack paddingHorizontal="$4" justifyContent="space-between" alignItems="center" marginBottom="$3">
                 <Button chromeless onPress={goPrevMonth} icon={<ChevronLeft size={20} color={C.sub} />} data-testid="calendar-prev-month-btn" />
-                <H3 color={C.text} fontWeight="700" data-testid="calendar-month-label">
+                <H3 color={C.text} fontFamily={FONT.heading} fontSize={22} letterSpacing={0.5} data-testid="calendar-month-label">
                   {MONTH_NAMES[viewMonth]} {viewYear}
                 </H3>
                 <Button chromeless onPress={goNextMonth} icon={<ChevronRight size={20} color={C.sub} />} data-testid="calendar-next-month-btn" />
@@ -311,7 +333,7 @@ export default function CalendarScreen() {
               {/* Week navigation */}
               <XStack paddingHorizontal="$4" justifyContent="space-between" alignItems="center" marginBottom="$3">
                 <Button chromeless onPress={goPrevWeek} icon={<ChevronLeft size={20} color={C.sub} />} data-testid="calendar-prev-week-btn" />
-                <H4 color={C.text} fontWeight="700" data-testid="calendar-week-label">
+                <H4 color={C.text} fontFamily={FONT.heading} fontSize={18} letterSpacing={0.5} data-testid="calendar-week-label">
                   {weekDays[0].getDate()} {MONTH_NAMES[weekDays[0].getMonth()].slice(0, 3)} – {weekDays[6].getDate()} {MONTH_NAMES[weekDays[6].getMonth()].slice(0, 3)}
                 </H4>
                 <Button chromeless onPress={goNextWeek} icon={<ChevronRight size={20} color={C.sub} />} data-testid="calendar-next-week-btn" />
@@ -454,6 +476,16 @@ export default function CalendarScreen() {
         </BlinkDialog>
       </YStack>
     </Theme>
+  );
+}
+
+// ── Period summary stat ──
+function CalStat({ value, label }: { value: string; label: string }) {
+  return (
+    <Card flex={1} padding="$3" borderRadius={12} backgroundColor={C.surface} borderColor={C.border} borderWidth={1} alignItems="center" gap="$1">
+      <Paragraph fontSize={24} fontFamily={FONT.display} color={C.volt} letterSpacing={0.5}>{value}</Paragraph>
+      <Paragraph fontSize={9} color={C.muted} fontFamily={FONT.bodyBold} letterSpacing={0.5}>{label}</Paragraph>
+    </Card>
   );
 }
 

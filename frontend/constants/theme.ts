@@ -16,3 +16,14 @@ export const C = {
 
 export const HERO_IMAGE =
   'https://images.pexels.com/photos/35540076/pexels-photo-35540076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940';
+
+// Condensed athletic type: Oswald (headings/numbers) + Manrope (body)
+export const FONT = {
+  display: 'Oswald_700Bold',
+  heading: 'Oswald_600SemiBold',
+  headingMed: 'Oswald_500Medium',
+  body: 'Manrope_500Medium',
+  bodyBold: 'Manrope_700Bold',
+  bodyBlack: 'Manrope_800ExtraBold',
+};
+

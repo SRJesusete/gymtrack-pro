@@ -32,6 +32,7 @@
 - Verified with headless chromium (playwright-core in /tmp) since screenshot_tool mis-paints slow Expo web loads. Blink signup → 200, tokens stored; calendar create → 201; reload persistence OK.
 
 ## Backlog / Next
-- P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian for full cohesion (currently inherit default dark theme + Volt tab bar/chrome).
-- P2: Load Oswald/Manrope fonts (@expo-google-fonts) for condensed headline look.
-- P2: Calendar — edit workout date; month summary (total volume/entrenos).
+- DONE (2026-07-27 P2): Typography — Oswald (headings via real h1–h6 tags) + Manrope (body) loaded via Google Fonts CDN in `app/_layout.tsx` WebStyleReset (Tamagui font-family props were unreliable on the expo-webpack web build, so global CSS is the source of truth). Also set Tamagui fonts.heading/body families.
+- DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos) reacting to Mes/Semana + navigation (`periodStats` + `CalStat`).
+- P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian for full cohesion.
+- P2: Calendar — edit workout date; filter by workout type.

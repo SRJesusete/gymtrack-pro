@@ -26,6 +26,8 @@
   "dependencies": {
     "@blinkdotnew/mobile-ui": "2.0.1",
     "@blinkdotnew/sdk": "^2.7.0",
+    "@expo-google-fonts/manrope": "^0.4.2",
+    "@expo-google-fonts/oswald": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@legendapp/list": "^2.0.16",
     "@react-native-async-storage/async-storage": "2.2.0",

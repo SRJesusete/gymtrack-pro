@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useTemplates, useSessions } from '@/hooks/useDatabase';
 import { LEVELS, getPresetsByLevel, type WorkoutLevel, type LevelInfo, type WorkoutPreset } from '@/constants/workoutPresets';
-import { C, HERO_IMAGE } from '@/constants/theme';
+import { C, HERO_IMAGE, FONT } from '@/constants/theme';
 
 export default function WorkoutHome() {
   const { user, isLoading: authLoading } = useAuth();
@@ -54,12 +54,12 @@ export default function WorkoutHome() {
               >
                 <XStack alignItems="center" gap="$2" marginBottom="$2">
                   <YStack width={8} height={8} borderRadius={4} backgroundColor={C.volt} />
-                  <Paragraph color={C.volt} fontWeight="800" letterSpacing={3} fontSize={11}>GYMTRACK PRO</Paragraph>
+                  <Paragraph color={C.volt} fontWeight="800" letterSpacing={3} fontSize={11} fontFamily={FONT.bodyBlack}>GYMTRACK PRO</Paragraph>
                 </XStack>
-                <H1 color={C.text} fontWeight="900" letterSpacing={-1.5} fontSize={44} lineHeight={44}>
+                <H1 color={C.text} fontFamily={FONT.display} letterSpacing={0.5} fontSize={52} lineHeight={50} textTransform="uppercase">
                   {user ? 'SUPÉRATE\nHOY' : 'TU DIARIO\nDE HIERRO'}
                 </H1>
-                <Paragraph color={C.sub} size="$4" marginTop="$2">
+                <Paragraph color={C.sub} size="$4" marginTop="$2" fontFamily={FONT.body}>
                   {user ? 'Registra cada serie. Domina cada repetición.' : 'Entrena. Registra. Progresa.'}
                 </Paragraph>
                 <Button
@@ -70,7 +70,7 @@ export default function WorkoutHome() {
                   icon={<Dumbbell size={20} color="#000000" />}
                   data-testid="start-free-workout-btn"
                 >
-                  EMPEZAR ENTRENO
+                  <Paragraph color="#000000" fontFamily={FONT.heading} fontSize={17} letterSpacing={1}>EMPEZAR ENTRENO</Paragraph>
                 </Button>
               </LinearGradient>
             </ImageBackground>
@@ -161,7 +161,7 @@ function SectionLabel({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <XStack alignItems="center" gap="$2">
       {icon}
-      <Paragraph color={C.sub} fontWeight="800" letterSpacing={2} fontSize={12}>{text}</Paragraph>
+      <Paragraph color={C.sub} fontFamily={FONT.headingMed} letterSpacing={2} fontSize={13} textTransform="uppercase">{text}</Paragraph>
     </XStack>
   );
 }
@@ -169,8 +169,8 @@ function SectionLabel({ icon, text }: { icon: React.ReactNode; text: string }) {
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <Card flex={1} padding="$3" borderRadius={12} backgroundColor={C.surface} borderColor={C.border} borderWidth={1} alignItems="center" gap="$1">
-      <Paragraph fontSize={26} fontWeight="900" color={C.volt} letterSpacing={-1}>{value}</Paragraph>
-      <Paragraph fontSize={9} color={C.muted} fontWeight="700" letterSpacing={1}>{label}</Paragraph>
+      <Paragraph fontSize={28} fontFamily={FONT.display} color={C.volt} letterSpacing={0.5}>{value}</Paragraph>
+      <Paragraph fontSize={9} color={C.muted} fontFamily={FONT.bodyBold} letterSpacing={1}>{label}</Paragraph>
     </Card>
   );
 }
@@ -200,10 +200,10 @@ function LevelCategory({ level, presets, expanded, onToggle, onStart }: {
           <Paragraph size="$7">{level.icon}</Paragraph>
         </Circle>
         <YStack flex={1} gap="$1">
-          <Paragraph fontWeight="900" color={expanded ? C.volt : C.text} fontSize={18} letterSpacing={-0.5}>
+          <Paragraph fontFamily={FONT.display} color={expanded ? C.volt : C.text} fontSize={22} letterSpacing={0.5}>
             {level.title.toUpperCase()}
           </Paragraph>
-          <Paragraph size="$2" color={C.muted}>{level.subtitle} · {presets.length} entrenos</Paragraph>
+          <Paragraph size="$2" color={C.muted} fontFamily={FONT.body}>{level.subtitle} · {presets.length} entrenos</Paragraph>
         </YStack>
         <Circle size={32} backgroundColor={C.elevated}>
           {expanded ? <ChevronDown size={18} color={C.volt} /> : <ChevronRight size={18} color={C.sub} />}
@@ -237,8 +237,8 @@ function PresetCard({ preset, onStart }: { preset: WorkoutPreset; onStart: () =>
           <Paragraph size="$7">{preset.icon}</Paragraph>
         </Circle>
         <YStack flex={1} gap="$1">
-          <H4 color={C.text} fontWeight="800" letterSpacing={-0.5}>{preset.name}</H4>
-          <Paragraph size="$2" color={C.muted} numberOfLines={2}>{preset.description}</Paragraph>
+          <H4 color={C.text} fontFamily={FONT.heading} fontSize={19} letterSpacing={0.3}>{preset.name}</H4>
+          <Paragraph size="$2" color={C.muted} numberOfLines={2} fontFamily={FONT.body}>{preset.description}</Paragraph>
         </YStack>
       </XStack>
 
@@ -269,7 +269,7 @@ function PresetCard({ preset, onStart }: { preset: WorkoutPreset; onStart: () =>
         onPress={onStart}
         icon={<Play size={16} color="#000000" />}
       >
-        EMPEZAR
+        <Paragraph color="#000000" fontFamily={FONT.heading} fontSize={15} letterSpacing={1}>EMPEZAR</Paragraph>
       </Button>
     </Card>
   );
