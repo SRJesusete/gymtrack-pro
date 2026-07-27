@@ -190,6 +190,7 @@ export default function ProfileScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 size="$4"
+                data-testid="auth-email-input"
               />
               <Input
                 placeholder="Contraseña"
@@ -197,6 +198,7 @@ export default function ProfileScreen() {
                 onChangeText={setPassword}
                 secureTextEntry
                 size="$4"
+                data-testid="auth-password-input"
               />
               {authMode === 'signup' && (
                 <Input
@@ -205,21 +207,27 @@ export default function ProfileScreen() {
                   onChangeText={setConfirmPassword}
                   secureTextEntry
                   size="$4"
+                  data-testid="auth-confirm-input"
                 />
               )}
               {authError ? (
                 <Card padding="$3" backgroundColor="$red2" borderRadius="$3">
-                  <Paragraph size="$2" color="$red10">{authError}</Paragraph>
+                  <Paragraph size="$2" color="$red10" data-testid="auth-error">{authError}</Paragraph>
                 </Card>
               ) : null}
 
               <Button
-                theme="active"
                 width="100%"
                 size="$5"
+                borderRadius={999}
+                backgroundColor="#D4FF00"
+                color="#000000"
+                fontWeight="900"
+                pressStyle={{ backgroundColor: '#BEE600', scale: 0.98 }}
                 onPress={handleAuth}
                 disabled={authBusy}
-                icon={authBusy ? <Spinner size="small" /> : <Mail size={18} />}
+                icon={authBusy ? <Spinner size="small" /> : <Mail size={18} color="#000000" />}
+                data-testid="auth-submit-btn"
               >
                 {authBusy
                   ? 'Procesando...'
@@ -239,6 +247,7 @@ export default function ProfileScreen() {
                   setConfirmPassword('');
                 }}
                 icon={<User size={18} />}
+                data-testid="auth-toggle-btn"
               >
                 {authMode === 'signin'
                   ? '¿No tienes cuenta? Regístrate'

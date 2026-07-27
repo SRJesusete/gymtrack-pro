@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useQuickLogSession, useUpdateSession, useDeleteSession } from '@/hooks/useDatabase';
 import type { Session } from '@/types';
+import { C } from '@/constants/theme';
 
 const DAY_NAMES = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 const MONTH_NAMES = [
@@ -184,8 +185,8 @@ export default function CalendarScreen() {
   if (authLoading) {
     return (
       <Theme name="dark">
-        <YStack flex={1} backgroundColor="$color1" justifyContent="center" alignItems="center">
-          <Spinner size="large" color="$color9" />
+        <YStack flex={1} backgroundColor={C.bg} justifyContent="center" alignItems="center">
+          <Spinner size="large" color={C.volt} />
         </YStack>
       </Theme>
     );
@@ -193,12 +194,12 @@ export default function CalendarScreen() {
 
   return (
     <Theme name="dark">
-      <YStack flex={1} backgroundColor="$color1">
+      <YStack flex={1} backgroundColor={C.bg}>
         <ScrollView contentContainerStyle={{ paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
           {/* Header */}
           <YStack padding="$4" paddingTop="$6" gap="$2">
-            <H2 color="$color12" fontWeight="800">Calendario</H2>
-            <Paragraph color="$color10">
+            <H2 color={C.text} fontWeight="800">Calendario</H2>
+            <Paragraph color={C.sub}>
               {user ? 'Registra y revisa tus entrenos por día' : 'Inicia sesión para usar el calendario'}
             </Paragraph>
           </YStack>
@@ -209,8 +210,8 @@ export default function CalendarScreen() {
               flex={1}
               size="$3"
               theme={viewMode === 'month' ? 'active' : undefined}
-              backgroundColor={viewMode === 'month' ? '$color9' : '$color2'}
-              color={viewMode === 'month' ? '$color1' : '$color11'}
+              backgroundColor={viewMode === 'month' ? C.volt : C.surface}
+              color={viewMode === 'month' ? C.bg : C.sub}
               onPress={() => setViewMode('month')}
               data-testid="calendar-view-month-btn"
             >
@@ -220,8 +221,8 @@ export default function CalendarScreen() {
               flex={1}
               size="$3"
               theme={viewMode === 'week' ? 'active' : undefined}
-              backgroundColor={viewMode === 'week' ? '$color9' : '$color2'}
-              color={viewMode === 'week' ? '$color1' : '$color11'}
+              backgroundColor={viewMode === 'week' ? C.volt : C.surface}
+              color={viewMode === 'week' ? C.bg : C.sub}
               onPress={() => setViewMode('week')}
               data-testid="calendar-view-week-btn"
             >
@@ -233,18 +234,18 @@ export default function CalendarScreen() {
             <>
               {/* Month navigation */}
               <XStack paddingHorizontal="$4" justifyContent="space-between" alignItems="center" marginBottom="$3">
-                <Button chromeless onPress={goPrevMonth} icon={<ChevronLeft size={20} color="$color11" />} data-testid="calendar-prev-month-btn" />
-                <H3 color="$color12" fontWeight="700" data-testid="calendar-month-label">
+                <Button chromeless onPress={goPrevMonth} icon={<ChevronLeft size={20} color={C.sub} />} data-testid="calendar-prev-month-btn" />
+                <H3 color={C.text} fontWeight="700" data-testid="calendar-month-label">
                   {MONTH_NAMES[viewMonth]} {viewYear}
                 </H3>
-                <Button chromeless onPress={goNextMonth} icon={<ChevronRight size={20} color="$color11" />} data-testid="calendar-next-month-btn" />
+                <Button chromeless onPress={goNextMonth} icon={<ChevronRight size={20} color={C.sub} />} data-testid="calendar-next-month-btn" />
               </XStack>
 
               {/* Day names */}
               <XStack paddingHorizontal="$4" marginBottom="$2">
                 {DAY_NAMES.map((d) => (
                   <YStack key={d} flex={1} alignItems="center" paddingVertical="$1">
-                    <Paragraph size="$1" color="$color10" fontWeight="600">{d}</Paragraph>
+                    <Paragraph size="$1" color={C.sub} fontWeight="600">{d}</Paragraph>
                   </YStack>
                 ))}
               </XStack>
@@ -265,21 +266,21 @@ export default function CalendarScreen() {
                           <Card
                             padding="$1"
                             borderRadius="$3"
-                            backgroundColor={isSelected ? '$color4' : isToday ? '$color3' : 'transparent'}
-                            borderColor={isSelected ? '$color9' : isToday ? '$color9' : 'transparent'}
+                            backgroundColor={isSelected ? C.border : isToday ? C.elevated : 'transparent'}
+                            borderColor={isSelected ? C.volt : isToday ? C.volt : 'transparent'}
                             borderWidth={isToday || isSelected ? 2 : 0}
                             minHeight={60}
                             onPress={() => setSelectedDate(isSelected ? null : day)}
                             data-testid={`calendar-day-${dayKey}`}
                           >
                             <YStack flex={1} alignItems="center" justifyContent="center" gap="$1">
-                              <Paragraph size="$2" fontWeight={isToday ? '800' : '600'} color={isToday ? '$color9' : '$color12'}>
+                              <Paragraph size="$2" fontWeight={isToday ? '800' : '600'} color={isToday ? C.volt : C.text}>
                                 {day.getDate()}
                               </Paragraph>
                               {hasWorkout && (
                                 <XStack gap={2}>
                                   {daySessions!.slice(0, 3).map((s) => (
-                                    <YStack key={s.id} width={6} height={6} borderRadius={3} backgroundColor="$orange9" />
+                                    <YStack key={s.id} width={6} height={6} borderRadius={3} backgroundColor={C.volt} />
                                   ))}
                                 </XStack>
                               )}
@@ -309,11 +310,11 @@ export default function CalendarScreen() {
             <>
               {/* Week navigation */}
               <XStack paddingHorizontal="$4" justifyContent="space-between" alignItems="center" marginBottom="$3">
-                <Button chromeless onPress={goPrevWeek} icon={<ChevronLeft size={20} color="$color11" />} data-testid="calendar-prev-week-btn" />
-                <H4 color="$color12" fontWeight="700" data-testid="calendar-week-label">
+                <Button chromeless onPress={goPrevWeek} icon={<ChevronLeft size={20} color={C.sub} />} data-testid="calendar-prev-week-btn" />
+                <H4 color={C.text} fontWeight="700" data-testid="calendar-week-label">
                   {weekDays[0].getDate()} {MONTH_NAMES[weekDays[0].getMonth()].slice(0, 3)} – {weekDays[6].getDate()} {MONTH_NAMES[weekDays[6].getMonth()].slice(0, 3)}
                 </H4>
-                <Button chromeless onPress={goNextWeek} icon={<ChevronRight size={20} color="$color11" />} data-testid="calendar-next-week-btn" />
+                <Button chromeless onPress={goNextWeek} icon={<ChevronRight size={20} color={C.sub} />} data-testid="calendar-next-week-btn" />
               </XStack>
 
               {/* Week day rows */}
@@ -328,25 +329,25 @@ export default function CalendarScreen() {
                       bordered
                       padding="$3"
                       borderRadius="$4"
-                      backgroundColor="$color2"
-                      borderColor={isToday ? '$color9' : '$color4'}
+                      backgroundColor={C.surface}
+                      borderColor={isToday ? C.volt : C.border}
                       borderWidth={isToday ? 2 : 1}
                       data-testid={`calendar-week-day-${dayKey}`}
                     >
                       <XStack justifyContent="space-between" alignItems="center" marginBottom={daySessions.length ? '$2' : 0}>
                         <XStack alignItems="center" gap="$2">
                           <YStack alignItems="center" width={42}>
-                            <Paragraph size="$1" color={isToday ? '$color9' : '$color10'} fontWeight="700">{DAY_NAMES[i]}</Paragraph>
-                            <Paragraph size="$5" color={isToday ? '$color9' : '$color12'} fontWeight="800">{day.getDate()}</Paragraph>
+                            <Paragraph size="$1" color={isToday ? C.volt : C.sub} fontWeight="700">{DAY_NAMES[i]}</Paragraph>
+                            <Paragraph size="$5" color={isToday ? C.volt : C.text} fontWeight="800">{day.getDate()}</Paragraph>
                           </YStack>
                           {daySessions.length === 0 && (
-                            <Paragraph size="$2" color="$color10">Sin entrenos</Paragraph>
+                            <Paragraph size="$2" color={C.sub}>Sin entrenos</Paragraph>
                           )}
                         </XStack>
                         {user && (
                           <Button
                             size="$2"
-                            theme="active"
+                            backgroundColor={C.volt} color="#000000" fontWeight="800" borderRadius={999}
                             onPress={() => openAdd(day)}
                             icon={<Plus size={14} />}
                             data-testid={`calendar-week-add-${dayKey}`}
@@ -369,15 +370,15 @@ export default function CalendarScreen() {
 
           {/* Legend */}
           <YStack padding="$4" marginTop="$2">
-            <Card bordered padding="$3" borderRadius="$4" backgroundColor="$color2">
+            <Card bordered padding="$3" borderRadius="$4" backgroundColor={C.surface}>
               <XStack gap="$4" justifyContent="center">
                 <XStack gap="$1" alignItems="center">
-                  <YStack width={10} height={10} borderRadius={5} backgroundColor="$orange9" />
-                  <Paragraph size="$1" color="$color10">Entreno</Paragraph>
+                  <YStack width={10} height={10} borderRadius={5} backgroundColor={C.volt} />
+                  <Paragraph size="$1" color={C.sub}>Entreno</Paragraph>
                 </XStack>
                 <XStack gap="$1" alignItems="center">
-                  <YStack width={10} height={10} borderRadius={5} backgroundColor="transparent" borderWidth={2} borderColor="$color9" />
-                  <Paragraph size="$1" color="$color10">Hoy</Paragraph>
+                  <YStack width={10} height={10} borderRadius={5} backgroundColor="transparent" borderWidth={2} borderColor={C.volt} />
+                  <Paragraph size="$1" color={C.sub}>Hoy</Paragraph>
                 </XStack>
               </XStack>
             </Card>
@@ -393,7 +394,7 @@ export default function CalendarScreen() {
         >
           <YStack gap="$3" paddingTop="$2">
             <YStack gap="$1">
-              <Paragraph size="$2" color="$color10" fontWeight="600">Nombre</Paragraph>
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Nombre</Paragraph>
               <Input
                 placeholder="Ej. Pecho y tríceps"
                 value={formName}
@@ -403,7 +404,7 @@ export default function CalendarScreen() {
               />
             </YStack>
             <YStack gap="$1">
-              <Paragraph size="$2" color="$color10" fontWeight="600">Duración (min)</Paragraph>
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Duración (min)</Paragraph>
               <Input
                 placeholder="Ej. 60"
                 value={formDuration}
@@ -414,7 +415,7 @@ export default function CalendarScreen() {
               />
             </YStack>
             <YStack gap="$1">
-              <Paragraph size="$2" color="$color10" fontWeight="600">Notas</Paragraph>
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Notas</Paragraph>
               <TextArea
                 placeholder="Cómo te fue, sensaciones, pesos..."
                 value={formNotes}
@@ -428,7 +429,7 @@ export default function CalendarScreen() {
               {editingId && (
                 <Button
                   theme="red"
-                  backgroundColor="$red9"
+                  backgroundColor={C.danger}
                   color="white"
                   onPress={handleDelete}
                   disabled={saving}
@@ -440,7 +441,7 @@ export default function CalendarScreen() {
               )}
               <Button
                 flex={1}
-                theme="active"
+                backgroundColor={C.volt} color="#000000" fontWeight="800" borderRadius={999}
                 onPress={handleSave}
                 disabled={saving}
                 icon={saving ? <Spinner size="small" /> : <Save size={16} />}
@@ -471,27 +472,27 @@ function DayDetails({
   return (
     <YStack padding="$4" marginTop="$3" gap="$3">
       <XStack justifyContent="space-between" alignItems="center">
-        <H4 color="$color12" flex={1}>
+        <H4 color={C.text} flex={1}>
           {date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
         </H4>
         {user && (
-          <Button theme="active" size="$3" onPress={onAdd} icon={<Plus size={14} />} data-testid="calendar-day-add-btn">
+          <Button backgroundColor={C.volt} color="#000000" fontWeight="800" borderRadius={999} size="$3" onPress={onAdd} icon={<Plus size={14} />} data-testid="calendar-day-add-btn">
             Añadir
           </Button>
         )}
       </XStack>
 
       {!user ? (
-        <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2">
-          <Paragraph color="$color10" textAlign="center">Inicia sesión para registrar entrenamientos</Paragraph>
+        <Card bordered padding="$4" borderRadius="$4" backgroundColor={C.surface}>
+          <Paragraph color={C.sub} textAlign="center">Inicia sesión para registrar entrenamientos</Paragraph>
         </Card>
       ) : loading ? (
-        <YStack padding="$4" alignItems="center"><Spinner size="small" color="$color9" /></YStack>
+        <YStack padding="$4" alignItems="center"><Spinner size="small" color={C.volt} /></YStack>
       ) : sessions.length === 0 ? (
-        <Card bordered padding="$4" borderRadius="$4" backgroundColor="$color2" alignItems="center" gap="$2">
-          <CalIcon size={32} color="$color6" />
-          <Paragraph color="$color10">Sin entrenamientos este día</Paragraph>
-          <Button theme="active" size="$3" onPress={onAdd} icon={<Plus size={14} />}>Registrar Entreno</Button>
+        <Card bordered padding="$4" borderRadius="$4" backgroundColor={C.surface} alignItems="center" gap="$2">
+          <CalIcon size={32} color={C.muted} />
+          <Paragraph color={C.sub}>Sin entrenamientos este día</Paragraph>
+          <Button backgroundColor={C.volt} color="#000000" fontWeight="800" borderRadius={999} size="$3" onPress={onAdd} icon={<Plus size={14} />}>Registrar Entreno</Button>
         </Card>
       ) : (
         <YStack gap="$2">
@@ -514,35 +515,35 @@ function SessionRow({
 }) {
   const time = new Date(session.startedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   return (
-    <Card bordered padding="$3" borderRadius="$4" backgroundColor="$color3" data-testid={`calendar-session-${session.id}`}>
+    <Card bordered padding="$3" borderRadius="$4" backgroundColor={C.elevated} data-testid={`calendar-session-${session.id}`}>
       <XStack justifyContent="space-between" alignItems="flex-start" gap="$2">
         <YStack flex={1} gap="$1">
-          <Paragraph fontWeight="700" color="$color12">{session.name}</Paragraph>
+          <Paragraph fontWeight="700" color={C.text}>{session.name}</Paragraph>
           <XStack gap="$3" alignItems="center" flexWrap="wrap">
             <XStack gap="$1" alignItems="center">
-              <Clock size={12} color="$color10" />
-              <Paragraph size="$1" color="$color10">
+              <Clock size={12} color={C.sub} />
+              <Paragraph size="$1" color={C.sub}>
                 {time}{session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
               </Paragraph>
             </XStack>
             {session.totalVolume > 0 && (
               <XStack gap="$1" alignItems="center">
-                <Dumbbell size={12} color="$color9" />
-                <Paragraph size="$1" color="$color9" fontWeight="600">{session.totalVolume.toLocaleString()} kg</Paragraph>
+                <Dumbbell size={12} color={C.volt} />
+                <Paragraph size="$1" color={C.volt} fontWeight="600">{session.totalVolume.toLocaleString()} kg</Paragraph>
               </XStack>
             )}
           </XStack>
           {session.notes ? (
-            <Paragraph size="$2" color="$color11" marginTop="$1">{session.notes}</Paragraph>
+            <Paragraph size="$2" color={C.sub} marginTop="$1">{session.notes}</Paragraph>
           ) : null}
         </YStack>
         <YStack gap="$1">
           <Button size="$2" chromeless onPress={onEdit} data-testid={`calendar-edit-${session.id}`}>
-            <Paragraph size="$2" color="$color9" fontWeight="700">Editar</Paragraph>
+            <Paragraph size="$2" color={C.volt} fontWeight="700">Editar</Paragraph>
           </Button>
           {session.totalVolume > 0 && (
             <Button size="$2" chromeless onPress={onOpenFull}>
-              <Paragraph size="$1" color="$color10">Ver</Paragraph>
+              <Paragraph size="$1" color={C.sub}>Ver</Paragraph>
             </Button>
           )}
         </YStack>
