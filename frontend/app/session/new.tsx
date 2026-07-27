@@ -31,7 +31,7 @@ interface ExerciseData {
 }
 
 export default function NewSessionScreen() {
-  const { templateId, presetId } = useLocalSearchParams<{ templateId?: string; presetId?: string }>();
+  const { templateId, presetId, date } = useLocalSearchParams<{ templateId?: string; presetId?: string; date?: string }>();
   const { user } = useAuth();
   const { data: exercises } = useExercises();
   const { data: template } = useTemplateWithExercises(templateId || null);
@@ -180,6 +180,9 @@ export default function NewSessionScreen() {
         userId: user.id,
         name: sessionName,
         templateId: templateId || undefined,
+        startedAt: date
+          ? new Date(`${date}T${new Date().toTimeString().slice(0, 8)}`).toISOString()
+          : undefined,
         exercises: exerciseData
           .filter((ex) => ex.sets.some((s) => s.weight || s.reps))
           .map((ex) => ({

@@ -38,6 +38,16 @@ export interface Session {
   notes: string;
 }
 
+export interface UserExercise {
+  id: string;
+  userId: string;
+  name: string;
+  muscleGroup: string;
+  category: string;
+  description: string;
+  videoUrl?: string;
+}
+
 export interface SessionExercise {
   id: string;
   sessionId: string;

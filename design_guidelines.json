@@ -1,0 +1,117 @@
+{
+  "app_name": "GymTrack Pro",
+  "theme_strategy": "dark-only (Tactical Performance)",
+  "archetype": "The Performance Pro (Elite Athleticism & Precision)",
+  "colors": {
+    "background": "#09090B",
+    "surface": "#141414",
+    "surface_elevated": "#1F1F1F",
+    "border": "#27272A",
+    "border_focus": "#D4FF00",
+    "primary": "#D4FF00",
+    "primary_hover": "#BEE600",
+    "primary_foreground": "#000000",
+    "secondary": "#27272A",
+    "secondary_foreground": "#FFFFFF",
+    "danger": "#FF3B30",
+    "success": "#34C759",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A1A1AA",
+    "text_muted": "#71717A",
+    "gradients": {
+      "pr_badge": ["#D4FF00", "#FFB800"],
+      "hero_overlay": ["rgba(9,9,11,0)", "rgba(9,9,11,1)"]
+    }
+  },
+  "typography": {
+    "font_families": {
+      "heading": "Oswald, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-5xl font-black tracking-tighter uppercase",
+      "h2": "text-3xl font-bold tracking-tight uppercase",
+      "h3": "text-xl font-bold tracking-tight",
+      "body": "text-base font-normal tracking-normal",
+      "small": "text-sm font-medium tracking-wide text-secondary",
+      "micro": "text-xs font-bold tracking-[0.2em] uppercase"
+    }
+  },
+  "components": {
+    "cards": {
+      "style": "Flat surface, no soft shadows, 1px solid border (#27272A), sharp or slightly rounded corners (borderRadius: 8px).",
+      "hover_active_state": "Slight scale down (0.98) on press via reanimated, border color shifts to #71717A."
+    },
+    "buttons": {
+      "primary": "Pill-shaped (borderRadius: 9999px), Background: #D4FF00, Text: #000000 (Oswald, Uppercase). No shadow, flat and tactical.",
+      "secondary": "Background: transparent, Border: 1px solid #D4FF00, Text: #D4FF00.",
+      "ghost": "Background: transparent, Text: #A1A1AA. Hover/Active: Text #FFFFFF."
+    },
+    "headers": {
+      "style": "Glassmorphism. Do not use pure transparent! Use expo-blur with intensity 80, tint 'dark', and a 1px bottom border (#27272A)."
+    },
+    "calendar_cells": {
+      "default": "Flat #141414, 1px border #27272A.",
+      "selected": "Border 1px #D4FF00, Background #141414.",
+      "workout_dot": "4px by 4px circle, color #D4FF00."
+    },
+    "badges": {
+      "pr": "Use expo-linear-gradient (Gold/Volt), Black text, uppercase micro typography."
+    }
+  },
+  "layouts": {
+    "spacing": "Generous spacing. Use $4 (16px) for inner card padding, $6 (24px) for screen margins. Vertical gaps between sections should be $8 (32px).",
+    "home_screen": "Hero header overlapping content. High-density 'Bento' grid for stats (total workouts, kg lifted).",
+    "workout_session": "Dense, scan-able list. Every pixel utilized. Rows for Sets/Reps/Weight with distinct column alignment."
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Used strictly for fixed headers/bottom tabs (via expo-blur).",
+    "lines_and_grid": "Grid borders (The 'Technical' Look). Expose the skeleton. Dashboards/stats should feel like a command center.",
+    "borders": "Tactical Minimalism. Replace soft shadows with 1px solid strokes."
+  },
+  "motion": {
+    "page_transitions": "Fade in and slight upward slide (reanimated).",
+    "micro_interactions": "Buttons scale to 0.95 on press. Success states trigger a quick color flash (white to Volt)."
+  },
+  "accessibility": {
+    "contrast": "Ensure Volt accent (#D4FF00) has pure black text for readability. APCA contrast compliant.",
+    "touch_targets": "Minimum 44x44px for all interactive elements (calendar days, checkboxes).",
+    "test_ids": "All interactive elements MUST include a `data-testid` attribute (e.g., `data-testid=\"start-workout-btn\"`)."
+  },
+  "image_urls": [
+    {
+      "url": "https://images.pexels.com/photos/35540076/pexels-photo-35540076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "Hero Background",
+      "description": "Athletic man working out in a modern gym. Use with heavy dark gradient overlay."
+    },
+    {
+      "url": "https://images.pexels.com/photos/29859460/pexels-photo-29859460.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "Workout Preset Cover",
+      "description": "Athlete performing pull-ups."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1543164904-8ff92670a192",
+      "category": "Stats/Tracking Empty State",
+      "description": "Close up photo of a turned-on device/tracking."
+    }
+  ],
+  "instructions_to_main_agent": [
+    "This is a Tamagui + React Native Expo project. Map the HEX colors provided into the Tamagui theme configuration or create a custom palette.",
+    "Do NOT output generic HTML/CSS. Use Tamagui primitives (Stack, XStack, YStack, Text, Button) or React Native elements.",
+    "Implement The Performance Pro archetype: Deep Obsidian (#09090B) base, Pure White (#FFFFFF) text, and Volt Lime (#D4FF00) as the kinetic trigger.",
+    "Use 'expo-linear-gradient' for PR badges and 'expo-blur' for sticky headers/bottom tabs.",
+    "Typography: Use a condensed uppercase font (e.g., Oswald or Anton) for headers and numbers, and a geometric sans (e.g., Manrope) for body text. Load these via @expo-google-fonts.",
+    "For the Calendar, do not use native 'input date'. Build a grid using Tamagui stacks or a reliable RN calendar library, customized heavily to match the flat, 1px-border aesthetic.",
+    "Do not use generic 'orange' or 'purple'. Stick strictly to the Obsidian/White/Volt palette.",
+    "Use `data-testid` on all buttons, touchables, and inputs."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Never use purely transparent backgrounds on elements overlapping content (headers, bottom tabs, modals). Always use a solid color or a blur layer.",
+    "Avoid generic centered layouts. Use left-aligned, asymmetrical 'tactical' layouts with strong grids.",
+    "Use layered design elements: 1px borders instead of soft shadows to create depth.",
+    "Create distinctive interfaces: surprise and delight with micro-animations on press via react-native-reanimated.",
+    "Do not use AI assistant emojis for icons. Use proper SVG icon libraries (lucide-react-native).",
+    "Missing images must be handled with the provided image_urls, NO placeholder text."
+  ]
+}

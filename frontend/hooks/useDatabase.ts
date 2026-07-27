@@ -10,6 +10,7 @@ import type {
   SessionSet,
   SessionWithExercises,
   PersonalRecord,
+  UserExercise,
 } from '@/types';
 
 // -- EXERCISES (public) --
@@ -158,6 +159,7 @@ export function useCreateSession() {
       userId: string;
       name: string;
       templateId?: string;
+      startedAt?: string;
       exercises: {
         exerciseId: string;
         exerciseName: string;
@@ -171,6 +173,7 @@ export function useCreateSession() {
         name: data.name,
         totalVolume: 0,
         durationMinutes: 0,
+        ...(data.startedAt ? { startedAt: data.startedAt } : {}),
       });
 
       let totalVolume = 0;
@@ -258,6 +261,79 @@ export function useDeleteSession() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sessions'] });
     },
+  });
+}
+
+// -- QUICK CALENDAR LOG (date + duration + notes) --
+
+export function useQuickLogSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      userId: string;
+      name: string;
+      startedAt: string;
+      durationMinutes: number;
+      notes: string;
+    }) => {
+      const session = await blink.db.table<Session>('sessions').create({
+        userId: data.userId,
+        templateId: null,
+        name: data.name,
+        startedAt: data.startedAt,
+        completedAt: data.startedAt,
+        totalVolume: 0,
+        durationMinutes: data.durationMinutes,
+        notes: data.notes,
+      });
+      return session;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sessions'] });
+    },
+  });
+}
+
+export function useUpdateSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      id: string;
+      name: string;
+      durationMinutes: number;
+      notes: string;
+      startedAt?: string;
+    }) => {
+      await blink.db.table<Session>('sessions').update(data.id, {
+        name: data.name,
+        durationMinutes: data.durationMinutes,
+        notes: data.notes,
+        ...(data.startedAt ? { startedAt: data.startedAt } : {}),
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sessions'] });
+    },
+  });
+}
+
+// -- USER EXERCISES (custom, used by help screen) --
+
+export function useUserExercises(userId: string | null) {
+  return useQuery({
+    queryKey: ['userExercises', userId],
+    queryFn: async () => {
+      if (!userId) return [] as UserExercise[];
+      try {
+        return await blink.db.table<UserExercise>('userExercises').list({
+          where: { userId },
+          orderBy: { name: 'asc' },
+        });
+      } catch {
+        return [] as UserExercise[];
+      }
+    },
+    enabled: !!userId,
   });
 }
 
