@@ -1,0 +1,45 @@
+{
+  "summary": "Regression tested GymTrack Pro (Expo web) after removing dangerouslySetInnerHTML in favor of document.createElement-based font injection in app/_layout.tsx. All 7 requested flows pass. Fonts are NOT falling back to serif: <style id=\"gt-web-fonts\"> is present (276 chars), Google Fonts <link> for Oswald+Manrope is injected, hero <h1> 'TU DIARIO DE HIERRO' and section titles compute to fontFamily='Oswald, Manrope, sans-serif', body uses Manrope stack. Auth signup returns 200 (Blink), authenticated state entered. Level accordion (intermedio) expands. Calendar quick-log persisted a Pecho / 55 min / 2,500 kg / Fuerza workout; summary bento shows 1 entreno / 2,500 KG / 55 MINUTOS; reload preserves it. Filter chip and type-bar-fuerza chart bar are both tappable in Calendario and Progreso. Progreso range switches (month/year/all) work, kg total includes 2,500, type-bar-fuerza tap filters. Tab bar shows all 7 tabs (Entreno/Calendario/Historial/Plantillas/Progreso/Cuenta/Ayuda) and each navigates without crashes. Home hero button start-free-workout-btn opens a session screen. Dark theme intact.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "console_warnings_observed": [
+    "SVG polyline error: `<polyline> attribute points: Expected number, \"M 50 20\"` — a polyline is being fed an SVG path 'M ...' string instead of numeric x,y pairs. Likely in a chart component (progress volume 'Total' line chart or TypeDistribution). Non-blocking (chart still shows a non-zero point) but should be fixed to keep the console clean.",
+    "React Native Web warning: `Unexpected text node: . A text node cannot be a child of a <View>.` — stray whitespace/text node inside a <View>. Non-blocking.",
+    "Deprecation: `props.pointerEvents is deprecated. Use style.pointerEvents` (Tamagui/RN-Web)."
+  ],
+  "observations_on_requested_features": {
+    "quitar_filtro_hint_on_progreso": "After tapping progress `type-bar-fuerza`, the copy 'quitar filtro' was NOT found in visible DOM text (case-insensitive search). The bar is tappable and filter state is applied (volume chart re-renders), but the user-facing hint text that was expected ('quitar filtro') is missing/renamed. Please verify the copy — it may say 'Toca una barra' or 'Quita el filtro' etc., or the hint may only appear elsewhere.",
+    "start_free_workout_session_screen": "Home hero button `start-free-workout-btn` clicks and navigates, but the exact string 'Nuevo Entreno' was not detected in the resulting screen. The nav succeeded (no crash), so likely just different title casing/copy. Worth confirming visually.",
+    "calendar_type_filter_active_state": "Tapping `type-bar-fuerza` inside Calendario does re-render, but `aria-pressed` on `calendar-filter-fuerza` is null and there's no obvious active-state attribute. Consider setting aria-pressed='true' on the active chip for a11y + easier testability."
+  },
+  "font_regression_check": {
+    "style_element_id_gt_web_fonts_present": true,
+    "google_fonts_link_present": true,
+    "heading_font_family": "Oswald, Manrope, sans-serif",
+    "body_font_family": "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "serif_fallback_detected": false,
+    "blank_screen": false
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix SVG polyline in chart: it's being passed an SVG-path string ('M 50 20') where numeric 'x,y x,y' points are expected. Check TypeDistribution / volume 'Total' line chart on Progreso.",
+    "Remove stray text node inside a <View> causing RN-Web console warning.",
+    "Add/verify 'quitar filtro' hint copy on Progreso when a type filter is active via chart bar tap.",
+    "Add aria-pressed on `calendar-filter-*` chips for active state (a11y + testability)."
+  ],
+  "critical_code_review_comments": [
+    "useWebFonts() migration from dangerouslySetInnerHTML to document.createElement is correct and confirmed working; add an idempotency guard (already present via id='gt-web-fonts') — verified only one style tag is created.",
+    "Consider preconnect <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\"> to reduce FOUT on cold web load."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (external Blink)", "frontend": "100% of requested flows executed; ~95% pass (2 minor copy/aria items)"},
+  "test_credentials": "Registered fresh accounts via Blink self-registration, e.g. tester+1785182801@gymtrack.test / test1234 (200 OK).",
+  "seed_data_creation": "One workout created via Calendar quick-log (Pecho, 55 min, 2,500 kg, Fuerza) — verified persisted after reload.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Font injection regression is fully cleared. Two console warnings remain (SVG polyline points string, RN-Web stray text node). Auth requires network to https://blink.new which is reachable from the preview. Modal save button can be below the fold at 1400x900 — use scroll_into_view_if_needed before clicking calendar-form-save-btn. Tab bar labels are title-case in DOM but CSS-uppercased; use case-insensitive selectors."
+}

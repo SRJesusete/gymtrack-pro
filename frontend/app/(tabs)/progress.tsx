@@ -211,6 +211,11 @@ export default function ProgressScreen() {
     return { all: allPoints, ...muscleVolume };
   }, [chartSessions]);
 
+  const totalVolumeAll = useMemo(
+    () => (sessions || []).reduce((sum, s) => sum + (s.totalVolume || 0), 0),
+    [sessions]
+  );
+
   if (authLoading) {
     return (
       <Theme name="dark">
@@ -412,7 +417,7 @@ export default function ProgressScreen() {
                   <YStack alignItems="center" gap="$1">
                     <TrendingUp size={20} color={C.success} />
                     <H4 color={C.text} fontWeight="800">
-                      {sessions.reduce((sum, s) => sum + s.totalVolume, 0).toLocaleString()}
+                      {totalVolumeAll.toLocaleString()}
                     </H4>
                     <Paragraph size="$2" color={C.sub}>kg totales</Paragraph>
                   </YStack>
