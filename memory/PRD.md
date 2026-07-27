@@ -38,4 +38,4 @@
 - DONE (2026-07-27 P2): Oswald headings + Manrope body (Google Fonts CDN in `app/_layout.tsx`).
 - DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos).
 - P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian.
-- P2: Per-type breakdown chart also on Progreso screen.
+- DONE (2026-07-27 P2): Reused TypeDistribution chart on Progreso (`components/TypeDistribution.tsx`, metric="volume" all-time). Verified.

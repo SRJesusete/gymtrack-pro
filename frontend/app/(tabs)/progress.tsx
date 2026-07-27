@@ -9,6 +9,7 @@ import Svg, { Rect, Line, Circle, Text as SvgText, Polyline } from 'react-native
 import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useSessionWithExercises, usePersonalRecords } from '@/hooks/useDatabase';
 import type { Session, SessionWithExercises } from '@/types';
+import { TypeDistribution } from '@/components/TypeDistribution';
 
 const CHART_WIDTH = Dimensions.get('window').width - 64;
 const CHART_HEIGHT = 200;
@@ -302,6 +303,13 @@ export default function ProgressScreen() {
               </Card>
             )}
           </YStack>
+
+          {/* Distribution by workout type */}
+          {sessions && sessions.length > 0 && (
+            <YStack paddingHorizontal="$4" marginBottom="$2">
+              <TypeDistribution sessions={sessions} title="Distribución por tipo · Total" metric="volume" />
+            </YStack>
+          )}
 
           {/* Personal Records */}
           {records && records.length > 0 && (

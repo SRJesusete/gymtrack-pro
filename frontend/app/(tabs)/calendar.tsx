@@ -11,6 +11,7 @@ import { useSessions, useQuickLogSession, useUpdateSession, useDeleteSession } f
 import type { Session } from '@/types';
 import { C, FONT } from '@/constants/theme';
 import { WORKOUT_TYPES, getTypeColor, getTypeLabel, packNotes, unpackType, stripTypeMarker } from '@/constants/workoutTypes';
+import { TypeDistribution } from '@/components/TypeDistribution';
 
 const DAY_NAMES = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 const MONTH_NAMES = [
@@ -111,30 +112,16 @@ export default function CalendarScreen() {
     return { count, volume, minutes };
   }, [filteredSessions, viewMode, viewYear, viewMonth, weekDays]);
 
-  // Distribution per type over the current period (ignores the type filter)
-  const typeStats = useMemo(() => {
-    const acc: Record<string, { count: number; minutes: number; volume: number }> = {};
-    if (sessions) {
-      const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
-      for (const s of sessions) {
-        const d = new Date(s.startedAt);
-        const inRange = viewMode === 'month'
-          ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
-          : weekKeys.has(formatDateKey(d));
-        if (!inRange) continue;
-        const t = unpackType(s.notes);
-        if (!acc[t]) acc[t] = { count: 0, minutes: 0, volume: 0 };
-        acc[t].count++;
-        acc[t].minutes += s.durationMinutes || 0;
-        acc[t].volume += s.totalVolume || 0;
-      }
-    }
-    const rows = WORKOUT_TYPES
-      .map((t) => ({ type: t, ...(acc[t.id] || { count: 0, minutes: 0, volume: 0 }) }))
-      .filter((r) => r.count > 0)
-      .sort((a, b) => b.minutes - a.minutes);
-    const maxMin = Math.max(1, ...rows.map((r) => r.minutes));
-    return { rows, maxMin };
+  // All sessions in the current period (ignores the type filter) for the chart
+  const periodSessions = useMemo(() => {
+    if (!sessions) return [];
+    const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
+    return sessions.filter((s) => {
+      const d = new Date(s.startedAt);
+      return viewMode === 'month'
+        ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
+        : weekKeys.has(formatDateKey(d));
+    });
   }, [sessions, viewMode, viewYear, viewMonth, weekDays]);
 
   const selectedSessions = useMemo(() => {
@@ -301,31 +288,13 @@ export default function CalendarScreen() {
           </ScrollView>
 
           {/* Distribution by type */}
-          {user && typeStats.rows.length > 0 && (
+          {user && periodSessions.length > 0 && (
             <YStack paddingHorizontal="$4" marginBottom="$4">
-              <Card bordered padding="$4" borderRadius={14} backgroundColor={C.surface} borderColor={C.border} data-testid="calendar-type-chart">
-                <Paragraph fontFamily={FONT.headingMed} color={C.sub} letterSpacing={1.5} fontSize={12} textTransform="uppercase" marginBottom="$3">
-                  Distribución por tipo · {viewMode === 'month' ? 'Mes' : 'Semana'}
-                </Paragraph>
-                <YStack gap="$3">
-                  {typeStats.rows.map((r) => (
-                    <YStack key={r.type.id} gap="$1">
-                      <XStack justifyContent="space-between" alignItems="center">
-                        <XStack alignItems="center" gap="$2">
-                          <YStack width={10} height={10} borderRadius={5} backgroundColor={r.type.color} />
-                          <Paragraph size="$2" color={C.text} fontWeight="700">{r.type.label}</Paragraph>
-                        </XStack>
-                        <Paragraph size="$1" color={C.sub}>
-                          {r.count} {r.count === 1 ? 'entreno' : 'entrenos'} · {r.minutes} min{r.volume > 0 ? ` · ${r.volume.toLocaleString()} kg` : ''}
-                        </Paragraph>
-                      </XStack>
-                      <YStack height={8} borderRadius={4} backgroundColor={C.elevated} overflow="hidden">
-                        <YStack height={8} borderRadius={4} backgroundColor={r.type.color} width={`${Math.max(6, Math.round((r.minutes / typeStats.maxMin) * 100))}%`} />
-                      </YStack>
-                    </YStack>
-                  ))}
-                </YStack>
-              </Card>
+              <TypeDistribution
+                sessions={periodSessions}
+                title={`Distribución por tipo · ${viewMode === 'month' ? 'Mes' : 'Semana'}`}
+                metric="minutes"
+              />
             </YStack>
           )}
 
