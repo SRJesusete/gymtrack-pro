@@ -73,6 +73,7 @@ export default function CalendarScreen() {
   const [targetDate, setTargetDate] = useState<Date>(new Date());
   const [formName, setFormName] = useState('');
   const [formDuration, setFormDuration] = useState('');
+  const [formVolume, setFormVolume] = useState('');
   const [formNotes, setFormNotes] = useState('');
   const [formType, setFormType] = useState<string>('fuerza');
   const [formDateObj, setFormDateObj] = useState<Date>(new Date());
@@ -153,6 +154,7 @@ export default function CalendarScreen() {
     setTargetDate(date);
     setFormName('');
     setFormDuration('');
+    setFormVolume('');
     setFormNotes('');
     setFormType('fuerza');
     setFormDateObj(date);
@@ -163,6 +165,7 @@ export default function CalendarScreen() {
     setTargetDate(new Date(s.startedAt));
     setFormName(s.name);
     setFormDuration(s.durationMinutes ? String(s.durationMinutes) : '');
+    setFormVolume(s.totalVolume ? String(s.totalVolume) : '');
     setFormNotes(stripTypeMarker(s.notes));
     setFormType(unpackType(s.notes));
     setFormDateObj(new Date(s.startedAt));
@@ -182,6 +185,7 @@ export default function CalendarScreen() {
     setSaving(true);
     try {
       const duration = parseInt(formDuration) || 0;
+      const volume = parseInt(formVolume) || 0;
       const packedNotes = packNotes(formNotes.trim(), formType);
       if (editingId) {
         await updateSession.mutateAsync({
@@ -190,6 +194,7 @@ export default function CalendarScreen() {
           durationMinutes: duration,
           notes: packedNotes,
           startedAt,
+          totalVolume: volume,
         });
         toast('Entreno actualizado', { variant: 'success' });
       } else {
@@ -199,6 +204,7 @@ export default function CalendarScreen() {
           startedAt,
           durationMinutes: duration,
           notes: packedNotes,
+          totalVolume: volume,
         });
         toast('Entreno guardado', { message: 'Añadido al calendario', variant: 'success' });
       }
@@ -482,6 +488,18 @@ export default function CalendarScreen() {
                 keyboardType="number-pad"
                 size="$4"
                 data-testid="calendar-form-duration-input"
+              />
+            </YStack>
+
+            <YStack gap="$1">
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Volumen total (kg) · opcional</Paragraph>
+              <Input
+                placeholder="Ej. 2500"
+                value={formVolume}
+                onChangeText={setFormVolume}
+                keyboardType="number-pad"
+                size="$4"
+                data-testid="calendar-form-volume-input"
               />
             </YStack>
             <YStack gap="$1">

@@ -275,6 +275,7 @@ export function useQuickLogSession() {
       startedAt: string;
       durationMinutes: number;
       notes: string;
+      totalVolume?: number;
     }) => {
       const session = await blink.db.table<Session>('sessions').create({
         userId: data.userId,
@@ -282,7 +283,7 @@ export function useQuickLogSession() {
         name: data.name,
         startedAt: data.startedAt,
         completedAt: data.startedAt,
-        totalVolume: 0,
+        totalVolume: data.totalVolume || 0,
         durationMinutes: data.durationMinutes,
         notes: data.notes,
       });
@@ -303,12 +304,14 @@ export function useUpdateSession() {
       durationMinutes: number;
       notes: string;
       startedAt?: string;
+      totalVolume?: number;
     }) => {
       await blink.db.table<Session>('sessions').update(data.id, {
         name: data.name,
         durationMinutes: data.durationMinutes,
         notes: data.notes,
         ...(data.startedAt ? { startedAt: data.startedAt } : {}),
+        ...(data.totalVolume !== undefined ? { totalVolume: data.totalVolume } : {}),
       });
     },
     onSuccess: () => {

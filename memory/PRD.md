@@ -32,6 +32,7 @@
 - Verified with headless chromium (playwright-core in /tmp) since screenshot_tool mis-paints slow Expo web loads. Blink signup → 200, tokens stored; calendar create → 201; reload persistence OK.
 
 ## Backlog / Next
+- DONE (2026-07-27): quick-log optional kg (Volumen total) field in calendar modal -> stored in `totalVolume`. Populates calendar KG summary, session kg badge, Progreso TypeDistribution(volume) + volume line 'Total' (combinedRunning now sums all sessions' volume). Verified e2e (2,500 kg).
 - DONE (2026-07-27 P2): Progreso range filter (Mes/Año/Todo, `range` state -> `rangedSessions`/`chartSessions`) feeding volume chart + TypeDistribution. TypeDistribution bars now tappable (`onSelectType`/`selectedType`): on Calendar toggles `filterType` (syncs chips); on Progreso filters the volume chart by type with highlight + 'quitar filtro'. Verified e2e.
 - DONE (2026-07-27 P2): DatePicker in add/edit modal (mobile-ui `DatePicker`, value=Date) replacing the text date field. Startedat = chosen date + preserved time-of-day.
 - DONE (2026-07-27 P2): "Distribución por tipo" mini bar chart on calendar (per-type count/minutes/kg for current Mes/Semana, `typeStats`). Colored bars by type.

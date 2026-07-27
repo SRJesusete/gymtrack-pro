@@ -172,6 +172,7 @@ export default function ProgressScreen() {
 
     let runningTotal: Record<string, number> = {};
     MUSCLE_GROUPS.forEach((g) => { runningTotal[g] = 0; });
+    let combinedRunning = 0;
 
     for (const s of sorted) {
       const date = new Date(s.startedAt);
@@ -198,11 +199,11 @@ export default function ProgressScreen() {
         });
       }
 
-      // Add a combined running total
-      const combined = Object.values(runningTotal).reduce((a, b) => a + b, 0);
+      // Combined running total across ALL volume (matched or not)
+      combinedRunning += s.totalVolume || 0;
       allPoints.push({
         date: s.startedAt,
-        volume: Math.round(combined),
+        volume: Math.round(combinedRunning),
         label,
       });
     }
