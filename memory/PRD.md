@@ -32,8 +32,10 @@
 - Verified with headless chromium (playwright-core in /tmp) since screenshot_tool mis-paints slow Expo web loads. Blink signup → 200, tokens stored; calendar create → 201; reload persistence OK.
 
 ## Backlog / Next
-- DONE (2026-07-27 P2): Edit workout date (Fecha field, AAAA-MM-DD) + Filter calendar by type. Types: Fuerza/Hipertrofia/Cardio/Movilidad/Otro (`constants/workoutTypes.ts`), colored filter chips, day-dot colors and per-session badges. NOTE: Blink `sessions` schema is FIXED (no `workout_type` column, new tables don't auto-create), so type is persisted ENCODED in the `notes` column via `::tipo=<id>` marker (`packNotes`/`unpackType`/`stripTypeMarker`) and stripped for display. Verified e2e.
-- DONE (2026-07-27 P2): Oswald headings + Manrope body via Google Fonts CDN (global CSS in `app/_layout.tsx`).
-- DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos), reacts to Mes/Semana + type filter.
+- DONE (2026-07-27 P2): DatePicker in add/edit modal (mobile-ui `DatePicker`, value=Date) replacing the text date field. Startedat = chosen date + preserved time-of-day.
+- DONE (2026-07-27 P2): "Distribución por tipo" mini bar chart on calendar (per-type count/minutes/kg for current Mes/Semana, `typeStats`). Colored bars by type.
+- DONE (2026-07-27 P2): Edit workout date + filter calendar by type (type encoded in `notes` via `::tipo=` since Blink sessions schema is fixed). Colored chips/dots/badges.
+- DONE (2026-07-27 P2): Oswald headings + Manrope body (Google Fonts CDN in `app/_layout.tsx`).
+- DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos).
 - P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian.
-- P2: Native DatePicker for the date field; per-type monthly breakdown chart.
+- P2: Per-type breakdown chart also on Progreso screen.

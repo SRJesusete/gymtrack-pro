@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView } from 'react-native';
 import {
   YStack, XStack, H2, H3, H4, Paragraph, Button, Card,
-  Theme, Spinner, Input, TextArea, BlinkDialog, toast,
+  Theme, Spinner, Input, TextArea, BlinkDialog, toast, DatePicker,
 } from '@blinkdotnew/mobile-ui';
 import { Calendar as CalIcon, ChevronLeft, ChevronRight, Plus, Clock, Trash2, Save, Dumbbell } from '@blinkdotnew/mobile-ui';
 import { router } from 'expo-router';
@@ -74,7 +74,7 @@ export default function CalendarScreen() {
   const [formDuration, setFormDuration] = useState('');
   const [formNotes, setFormNotes] = useState('');
   const [formType, setFormType] = useState<string>('fuerza');
-  const [formDate, setFormDate] = useState<string>('');
+  const [formDateObj, setFormDateObj] = useState<Date>(new Date());
   const [saving, setSaving] = useState(false);
 
   const today = new Date();
@@ -111,6 +111,32 @@ export default function CalendarScreen() {
     return { count, volume, minutes };
   }, [filteredSessions, viewMode, viewYear, viewMonth, weekDays]);
 
+  // Distribution per type over the current period (ignores the type filter)
+  const typeStats = useMemo(() => {
+    const acc: Record<string, { count: number; minutes: number; volume: number }> = {};
+    if (sessions) {
+      const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
+      for (const s of sessions) {
+        const d = new Date(s.startedAt);
+        const inRange = viewMode === 'month'
+          ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
+          : weekKeys.has(formatDateKey(d));
+        if (!inRange) continue;
+        const t = unpackType(s.notes);
+        if (!acc[t]) acc[t] = { count: 0, minutes: 0, volume: 0 };
+        acc[t].count++;
+        acc[t].minutes += s.durationMinutes || 0;
+        acc[t].volume += s.totalVolume || 0;
+      }
+    }
+    const rows = WORKOUT_TYPES
+      .map((t) => ({ type: t, ...(acc[t.id] || { count: 0, minutes: 0, volume: 0 }) }))
+      .filter((r) => r.count > 0)
+      .sort((a, b) => b.minutes - a.minutes);
+    const maxMin = Math.max(1, ...rows.map((r) => r.minutes));
+    return { rows, maxMin };
+  }, [sessions, viewMode, viewYear, viewMonth, weekDays]);
+
   const selectedSessions = useMemo(() => {
     if (!selectedDate) return [];
     return sessionMap[formatDateKey(selectedDate)] || [];
@@ -142,7 +168,7 @@ export default function CalendarScreen() {
     setFormDuration('');
     setFormNotes('');
     setFormType('fuerza');
-    setFormDate(formatDateKey(date));
+    setFormDateObj(date);
     setModalOpen(true);
   };
   const openEdit = (s: Session) => {
@@ -152,19 +178,8 @@ export default function CalendarScreen() {
     setFormDuration(s.durationMinutes ? String(s.durationMinutes) : '');
     setFormNotes(stripTypeMarker(s.notes));
     setFormType(unpackType(s.notes));
-    setFormDate(formatDateKey(new Date(s.startedAt)));
+    setFormDateObj(new Date(s.startedAt));
     setModalOpen(true);
-  };
-
-  const buildStartedAt = (dateStr: string, baseTime: Date): string | null => {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr.trim());
-    if (!m) return null;
-    const d = new Date(
-      Number(m[1]), Number(m[2]) - 1, Number(m[3]),
-      baseTime.getHours(), baseTime.getMinutes(), baseTime.getSeconds()
-    );
-    if (isNaN(d.getTime())) return null;
-    return d.toISOString();
   };
 
   const handleSave = async () => {
@@ -173,11 +188,10 @@ export default function CalendarScreen() {
       toast('Nombre requerido', { message: 'Ponle un nombre al entreno', variant: 'error' });
       return;
     }
-    const startedAt = buildStartedAt(formDate, editingId ? targetDate : new Date());
-    if (!startedAt) {
-      toast('Fecha inválida', { message: 'Usa el formato AAAA-MM-DD', variant: 'error' });
-      return;
-    }
+    const base = editingId ? targetDate : new Date();
+    const startedAtDate = new Date(formDateObj);
+    startedAtDate.setHours(base.getHours(), base.getMinutes(), base.getSeconds());
+    const startedAt = startedAtDate.toISOString();
     setSaving(true);
     try {
       const duration = parseInt(formDuration) || 0;
@@ -285,6 +299,35 @@ export default function CalendarScreen() {
               <FilterChip key={t.id} label={t.label} active={filterType === t.id} color={t.color} onPress={() => setFilterType(t.id)} testid={`calendar-filter-${t.id}`} />
             ))}
           </ScrollView>
+
+          {/* Distribution by type */}
+          {user && typeStats.rows.length > 0 && (
+            <YStack paddingHorizontal="$4" marginBottom="$4">
+              <Card bordered padding="$4" borderRadius={14} backgroundColor={C.surface} borderColor={C.border} data-testid="calendar-type-chart">
+                <Paragraph fontFamily={FONT.headingMed} color={C.sub} letterSpacing={1.5} fontSize={12} textTransform="uppercase" marginBottom="$3">
+                  Distribución por tipo · {viewMode === 'month' ? 'Mes' : 'Semana'}
+                </Paragraph>
+                <YStack gap="$3">
+                  {typeStats.rows.map((r) => (
+                    <YStack key={r.type.id} gap="$1">
+                      <XStack justifyContent="space-between" alignItems="center">
+                        <XStack alignItems="center" gap="$2">
+                          <YStack width={10} height={10} borderRadius={5} backgroundColor={r.type.color} />
+                          <Paragraph size="$2" color={C.text} fontWeight="700">{r.type.label}</Paragraph>
+                        </XStack>
+                        <Paragraph size="$1" color={C.sub}>
+                          {r.count} {r.count === 1 ? 'entreno' : 'entrenos'} · {r.minutes} min{r.volume > 0 ? ` · ${r.volume.toLocaleString()} kg` : ''}
+                        </Paragraph>
+                      </XStack>
+                      <YStack height={8} borderRadius={4} backgroundColor={C.elevated} overflow="hidden">
+                        <YStack height={8} borderRadius={4} backgroundColor={r.type.color} width={`${Math.max(6, Math.round((r.minutes / typeStats.maxMin) * 100))}%`} />
+                      </YStack>
+                    </YStack>
+                  ))}
+                </YStack>
+              </Card>
+            </YStack>
+          )}
 
           {viewMode === 'month' ? (
             <>
@@ -482,13 +525,12 @@ export default function CalendarScreen() {
             </YStack>
 
             <YStack gap="$1">
-              <Paragraph size="$2" color={C.sub} fontWeight="600">Fecha (AAAA-MM-DD)</Paragraph>
-              <Input
-                placeholder="2026-07-01"
-                value={formDate}
-                onChangeText={setFormDate}
-                size="$4"
-                data-testid="calendar-form-date-input"
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Fecha</Paragraph>
+              <DatePicker
+                value={formDateObj}
+                onDateChange={setFormDateObj}
+                startDay={1}
+                placeholder="Selecciona la fecha"
               />
             </YStack>
 
