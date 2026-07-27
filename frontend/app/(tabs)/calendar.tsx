@@ -294,6 +294,8 @@ export default function CalendarScreen() {
                 sessions={periodSessions}
                 title={`Distribución por tipo · ${viewMode === 'month' ? 'Mes' : 'Semana'}`}
                 metric="minutes"
+                selectedType={filterType === 'all' ? null : filterType}
+                onSelectType={(id) => setFilterType((prev) => (prev === id ? 'all' : id))}
               />
             </YStack>
           )}

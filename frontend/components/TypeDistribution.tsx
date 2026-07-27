@@ -8,9 +8,11 @@ interface Props {
   sessions: Session[];
   title: string;
   metric?: 'minutes' | 'volume';
+  onSelectType?: (id: string) => void;
+  selectedType?: string | null;
 }
 
-export function TypeDistribution({ sessions, title, metric = 'minutes' }: Props) {
+export function TypeDistribution({ sessions, title, metric = 'minutes', onSelectType, selectedType }: Props) {
   const { rows, max, useVolume } = useMemo(() => {
     const acc: Record<string, { count: number; minutes: number; volume: number }> = {};
     for (const s of sessions) {
@@ -34,14 +36,36 @@ export function TypeDistribution({ sessions, title, metric = 'minutes' }: Props)
 
   return (
     <Card bordered padding="$4" borderRadius={14} backgroundColor={C.surface} borderColor={C.border} data-testid="type-distribution">
-      <Paragraph fontFamily={FONT.headingMed} color={C.sub} letterSpacing={1.5} fontSize={12} textTransform="uppercase" marginBottom="$3">
-        {title}
-      </Paragraph>
+      <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
+        <Paragraph fontFamily={FONT.headingMed} color={C.sub} letterSpacing={1.5} fontSize={12} textTransform="uppercase">
+          {title}
+        </Paragraph>
+        {onSelectType && selectedType ? (
+          <Paragraph size="$1" color={C.volt} fontWeight="700">Toca para quitar filtro</Paragraph>
+        ) : onSelectType ? (
+          <Paragraph size="$1" color={C.muted}>Toca una barra</Paragraph>
+        ) : null}
+      </XStack>
       <YStack gap="$3">
         {rows.map((r) => {
           const value = useVolume ? r.volume : r.minutes;
+          const active = selectedType === r.type.id;
+          const dim = !!selectedType && !active;
           return (
-            <YStack key={r.type.id} gap="$1">
+            <YStack
+              key={r.type.id}
+              gap="$1"
+              opacity={dim ? 0.4 : 1}
+              onPress={onSelectType ? () => onSelectType(r.type.id) : undefined}
+              pressStyle={onSelectType ? { opacity: 0.7 } : undefined}
+              cursor={onSelectType ? 'pointer' : undefined}
+              padding={onSelectType ? '$1' : 0}
+              borderRadius={8}
+              borderWidth={active ? 1 : 0}
+              borderColor={active ? r.type.color : 'transparent'}
+              backgroundColor={active ? C.elevated : 'transparent'}
+              data-testid={`type-bar-${r.type.id}`}
+            >
               <XStack justifyContent="space-between" alignItems="center">
                 <XStack alignItems="center" gap="$2">
                   <YStack width={10} height={10} borderRadius={5} backgroundColor={r.type.color} />

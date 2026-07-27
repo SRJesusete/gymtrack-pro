@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useSessionWithExercises, usePersonalRecords } from '@/hooks/useDatabase';
 import type { Session, SessionWithExercises } from '@/types';
 import { TypeDistribution } from '@/components/TypeDistribution';
+import { unpackType } from '@/constants/workoutTypes';
 import { C } from '@/constants/theme';
 
 const CHART_WIDTH = Dimensions.get('window').width - 64;
@@ -130,9 +131,30 @@ export default function ProgressScreen() {
   const { data: sessions, isLoading: ssLoading } = useSessions(user?.id || null);
   const { data: records } = usePersonalRecords(user?.id || null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [range, setRange] = useState<'month' | 'year' | 'all'>('all');
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+
+  // Sessions within the selected temporal range
+  const rangedSessions = useMemo(() => {
+    if (!sessions) return [];
+    if (range === 'all') return sessions;
+    const now = new Date();
+    return sessions.filter((s) => {
+      const d = new Date(s.startedAt);
+      if (range === 'month') return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      return d.getFullYear() === now.getFullYear();
+    });
+  }, [sessions, range]);
+
+  // Sessions used by the volume chart (range + optional type)
+  const chartSessions = useMemo(() => {
+    if (!typeFilter) return rangedSessions;
+    return rangedSessions.filter((s) => unpackType(s.notes) === typeFilter);
+  }, [rangedSessions, typeFilter]);
 
   // Volume by muscle group over time
   const volumeHistory = useMemo(() => {
+    const sessions = chartSessions;
     if (!sessions || sessions.length === 0) return {};
     const map: Record<string, VolumePoint[]> = {};
 
@@ -186,7 +208,7 @@ export default function ProgressScreen() {
     }
 
     return { all: allPoints, ...muscleVolume };
-  }, [sessions]);
+  }, [chartSessions]);
 
   if (authLoading) {
     return (
@@ -234,6 +256,30 @@ export default function ProgressScreen() {
             </Paragraph>
           </YStack>
 
+          {/* Range selector */}
+          <XStack paddingHorizontal="$4" gap="$2" marginBottom="$2">
+            {([['month', 'Mes'], ['year', 'Año'], ['all', 'Todo']] as const).map(([id, label]) => {
+              const active = range === id;
+              return (
+                <Card
+                  key={id}
+                  flex={1}
+                  paddingVertical="$2"
+                  borderRadius={999}
+                  alignItems="center"
+                  backgroundColor={active ? C.volt : C.surface}
+                  borderColor={active ? C.volt : C.border}
+                  borderWidth={1}
+                  onPress={() => setRange(id)}
+                  pressStyle={{ scale: 0.97 }}
+                  data-testid={`progress-range-${id}`}
+                >
+                  <Paragraph fontWeight="800" size="$2" color={active ? '#000000' : C.sub}>{label}</Paragraph>
+                </Card>
+              );
+            })}
+          </XStack>
+
           {/* Group Selector */}
           <ScrollView
             horizontal
@@ -251,7 +297,7 @@ export default function ProgressScreen() {
               >
                 <Paragraph
                   fontWeight="600"
-                  color={selectedGroup === null ? 'white' : C.sub}
+                  color={selectedGroup === null ? '#000000' : C.sub}
                   size="$2"
                 >
                   Total
@@ -306,9 +352,15 @@ export default function ProgressScreen() {
           </YStack>
 
           {/* Distribution by workout type */}
-          {sessions && sessions.length > 0 && (
+          {rangedSessions.length > 0 && (
             <YStack paddingHorizontal="$4" marginBottom="$2">
-              <TypeDistribution sessions={sessions} title="Distribución por tipo · Total" metric="volume" />
+              <TypeDistribution
+                sessions={rangedSessions}
+                title={`Distribución por tipo · ${range === 'month' ? 'Mes' : range === 'year' ? 'Año' : 'Total'}`}
+                metric="volume"
+                selectedType={typeFilter}
+                onSelectType={(id) => setTypeFilter((p) => (p === id ? null : id))}
+              />
             </YStack>
           )}
 
