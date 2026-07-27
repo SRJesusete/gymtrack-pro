@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessions, useQuickLogSession, useUpdateSession, useDeleteSession } from '@/hooks/useDatabase';
 import type { Session } from '@/types';
 import { C, FONT } from '@/constants/theme';
+import { WORKOUT_TYPES, getTypeColor, getTypeLabel, packNotes, unpackType, stripTypeMarker } from '@/constants/workoutTypes';
 
 const DAY_NAMES = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 const MONTH_NAMES = [
@@ -63,6 +64,7 @@ export default function CalendarScreen() {
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [filterType, setFilterType] = useState<string>('all');
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -71,38 +73,43 @@ export default function CalendarScreen() {
   const [formName, setFormName] = useState('');
   const [formDuration, setFormDuration] = useState('');
   const [formNotes, setFormNotes] = useState('');
+  const [formType, setFormType] = useState<string>('fuerza');
+  const [formDate, setFormDate] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   const today = new Date();
 
+  const filteredSessions = useMemo(() => {
+    if (!sessions) return [];
+    if (filterType === 'all') return sessions;
+    return sessions.filter((s) => unpackType(s.notes) === filterType);
+  }, [sessions, filterType]);
+
   const sessionMap = useMemo(() => {
     const map: Record<string, Session[]> = {};
-    if (!sessions) return map;
-    for (const s of sessions) {
+    for (const s of filteredSessions) {
       const key = formatDateKey(new Date(s.startedAt));
       if (!map[key]) map[key] = [];
       map[key].push(s);
     }
     return map;
-  }, [sessions]);
+  }, [filteredSessions]);
 
   const monthDays = useMemo(() => getMonthDays(viewYear, viewMonth), [viewYear, viewMonth]);
   const weekDays = useMemo(() => getWeekDays(weekStart), [weekStart]);
 
   const periodStats = useMemo(() => {
     let count = 0, volume = 0, minutes = 0;
-    if (sessions) {
-      const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
-      for (const s of sessions) {
-        const d = new Date(s.startedAt);
-        const inRange = viewMode === 'month'
-          ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
-          : weekKeys.has(formatDateKey(d));
-        if (inRange) { count++; volume += s.totalVolume || 0; minutes += s.durationMinutes || 0; }
-      }
+    const weekKeys = new Set(weekDays.map((d) => formatDateKey(d)));
+    for (const s of filteredSessions) {
+      const d = new Date(s.startedAt);
+      const inRange = viewMode === 'month'
+        ? d.getFullYear() === viewYear && d.getMonth() === viewMonth
+        : weekKeys.has(formatDateKey(d));
+      if (inRange) { count++; volume += s.totalVolume || 0; minutes += s.durationMinutes || 0; }
     }
     return { count, volume, minutes };
-  }, [sessions, viewMode, viewYear, viewMonth, weekDays]);
+  }, [filteredSessions, viewMode, viewYear, viewMonth, weekDays]);
 
   const selectedSessions = useMemo(() => {
     if (!selectedDate) return [];
@@ -134,6 +141,8 @@ export default function CalendarScreen() {
     setFormName('');
     setFormDuration('');
     setFormNotes('');
+    setFormType('fuerza');
+    setFormDate(formatDateKey(date));
     setModalOpen(true);
   };
   const openEdit = (s: Session) => {
@@ -141,8 +150,21 @@ export default function CalendarScreen() {
     setTargetDate(new Date(s.startedAt));
     setFormName(s.name);
     setFormDuration(s.durationMinutes ? String(s.durationMinutes) : '');
-    setFormNotes(s.notes || '');
+    setFormNotes(stripTypeMarker(s.notes));
+    setFormType(unpackType(s.notes));
+    setFormDate(formatDateKey(new Date(s.startedAt)));
     setModalOpen(true);
+  };
+
+  const buildStartedAt = (dateStr: string, baseTime: Date): string | null => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr.trim());
+    if (!m) return null;
+    const d = new Date(
+      Number(m[1]), Number(m[2]) - 1, Number(m[3]),
+      baseTime.getHours(), baseTime.getMinutes(), baseTime.getSeconds()
+    );
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString();
   };
 
   const handleSave = async () => {
@@ -151,27 +173,31 @@ export default function CalendarScreen() {
       toast('Nombre requerido', { message: 'Ponle un nombre al entreno', variant: 'error' });
       return;
     }
+    const startedAt = buildStartedAt(formDate, editingId ? targetDate : new Date());
+    if (!startedAt) {
+      toast('Fecha inválida', { message: 'Usa el formato AAAA-MM-DD', variant: 'error' });
+      return;
+    }
     setSaving(true);
     try {
       const duration = parseInt(formDuration) || 0;
+      const packedNotes = packNotes(formNotes.trim(), formType);
       if (editingId) {
         await updateSession.mutateAsync({
           id: editingId,
           name: formName.trim(),
           durationMinutes: duration,
-          notes: formNotes.trim(),
+          notes: packedNotes,
+          startedAt,
         });
         toast('Entreno actualizado', { variant: 'success' });
       } else {
-        const startedAt = new Date(
-          `${formatDateKey(targetDate)}T${new Date().toTimeString().slice(0, 8)}`
-        ).toISOString();
         await quickLog.mutateAsync({
           userId: user.id,
           name: formName.trim(),
           startedAt,
           durationMinutes: duration,
-          notes: formNotes.trim(),
+          notes: packedNotes,
         });
         toast('Entreno guardado', { message: 'Añadido al calendario', variant: 'success' });
       }
@@ -252,6 +278,14 @@ export default function CalendarScreen() {
             <CalStat value={String(periodStats.minutes)} label="MINUTOS" />
           </XStack>
 
+          {/* Type filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+            <FilterChip label="Todos" active={filterType === 'all'} color={C.volt} onPress={() => setFilterType('all')} testid="calendar-filter-all" />
+            {WORKOUT_TYPES.map((t) => (
+              <FilterChip key={t.id} label={t.label} active={filterType === t.id} color={t.color} onPress={() => setFilterType(t.id)} testid={`calendar-filter-${t.id}`} />
+            ))}
+          </ScrollView>
+
           {viewMode === 'month' ? (
             <>
               {/* Month navigation */}
@@ -302,7 +336,7 @@ export default function CalendarScreen() {
                               {hasWorkout && (
                                 <XStack gap={2}>
                                   {daySessions!.slice(0, 3).map((s) => (
-                                    <YStack key={s.id} width={6} height={6} borderRadius={3} backgroundColor={C.volt} />
+                                    <YStack key={s.id} width={6} height={6} borderRadius={3} backgroundColor={getTypeColor(unpackType(s.notes))} />
                                   ))}
                                 </XStack>
                               )}
@@ -447,6 +481,45 @@ export default function CalendarScreen() {
               />
             </YStack>
 
+            <YStack gap="$1">
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Fecha (AAAA-MM-DD)</Paragraph>
+              <Input
+                placeholder="2026-07-01"
+                value={formDate}
+                onChangeText={setFormDate}
+                size="$4"
+                data-testid="calendar-form-date-input"
+              />
+            </YStack>
+
+            <YStack gap="$2">
+              <Paragraph size="$2" color={C.sub} fontWeight="600">Tipo de entreno</Paragraph>
+              <XStack gap="$2" flexWrap="wrap">
+                {WORKOUT_TYPES.map((t) => {
+                  const active = formType === t.id;
+                  return (
+                    <Card
+                      key={t.id}
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius={999}
+                      backgroundColor={active ? t.color : C.elevated}
+                      borderColor={active ? t.color : C.border}
+                      borderWidth={1}
+                      onPress={() => setFormType(t.id)}
+                      pressStyle={{ scale: 0.96 }}
+                      data-testid={`calendar-form-type-${t.id}`}
+                    >
+                      <XStack alignItems="center" gap="$2">
+                        {!active && <YStack width={8} height={8} borderRadius={4} backgroundColor={t.color} />}
+                        <Paragraph size="$2" fontWeight="700" color={active ? '#000000' : C.text}>{t.label}</Paragraph>
+                      </XStack>
+                    </Card>
+                  );
+                })}
+              </XStack>
+            </YStack>
+
             <XStack gap="$2" marginTop="$2">
               {editingId && (
                 <Button
@@ -485,6 +558,28 @@ function CalStat({ value, label }: { value: string; label: string }) {
     <Card flex={1} padding="$3" borderRadius={12} backgroundColor={C.surface} borderColor={C.border} borderWidth={1} alignItems="center" gap="$1">
       <Paragraph fontSize={24} fontFamily={FONT.display} color={C.volt} letterSpacing={0.5}>{value}</Paragraph>
       <Paragraph fontSize={9} color={C.muted} fontFamily={FONT.bodyBold} letterSpacing={0.5}>{label}</Paragraph>
+    </Card>
+  );
+}
+
+// ── Type filter chip ──
+function FilterChip({ label, active, color, onPress, testid }: { label: string; active: boolean; color: string; onPress: () => void; testid: string }) {
+  return (
+    <Card
+      paddingHorizontal="$3"
+      paddingVertical="$2"
+      borderRadius={999}
+      backgroundColor={active ? color : C.surface}
+      borderColor={active ? color : C.border}
+      borderWidth={1}
+      onPress={onPress}
+      pressStyle={{ scale: 0.96 }}
+      data-testid={testid}
+    >
+      <XStack alignItems="center" gap="$2">
+        {!active && <YStack width={8} height={8} borderRadius={4} backgroundColor={color} />}
+        <Paragraph size="$2" fontWeight="700" color={active ? '#000000' : C.sub}>{label}</Paragraph>
+      </XStack>
     </Card>
   );
 }
@@ -546,11 +641,19 @@ function SessionRow({
   onOpenFull: () => void;
 }) {
   const time = new Date(session.startedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const typeId = unpackType(session.notes);
+  const cleanNotes = stripTypeMarker(session.notes);
   return (
     <Card bordered padding="$3" borderRadius="$4" backgroundColor={C.elevated} data-testid={`calendar-session-${session.id}`}>
       <XStack justifyContent="space-between" alignItems="flex-start" gap="$2">
         <YStack flex={1} gap="$1">
-          <Paragraph fontWeight="700" color={C.text}>{session.name}</Paragraph>
+          <XStack alignItems="center" gap="$2" flexWrap="wrap">
+            <Paragraph fontWeight="700" color={C.text}>{session.name}</Paragraph>
+            <XStack alignItems="center" gap="$1" paddingHorizontal="$2" paddingVertical={2} borderRadius={999} backgroundColor={C.surface} borderColor={getTypeColor(typeId)} borderWidth={1}>
+              <YStack width={6} height={6} borderRadius={3} backgroundColor={getTypeColor(typeId)} />
+              <Paragraph size="$1" color={getTypeColor(typeId)} fontWeight="700">{getTypeLabel(typeId)}</Paragraph>
+            </XStack>
+          </XStack>
           <XStack gap="$3" alignItems="center" flexWrap="wrap">
             <XStack gap="$1" alignItems="center">
               <Clock size={12} color={C.sub} />
@@ -565,8 +668,8 @@ function SessionRow({
               </XStack>
             )}
           </XStack>
-          {session.notes ? (
-            <Paragraph size="$2" color={C.sub} marginTop="$1">{session.notes}</Paragraph>
+          {cleanNotes ? (
+            <Paragraph size="$2" color={C.sub} marginTop="$1">{cleanNotes}</Paragraph>
           ) : null}
         </YStack>
         <YStack gap="$1">

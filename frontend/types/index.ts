@@ -36,6 +36,7 @@ export interface Session {
   totalVolume: number;
   durationMinutes: number;
   notes: string;
+  workoutType?: string;
 }
 
 export interface UserExercise {
