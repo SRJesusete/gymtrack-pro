@@ -1,34 +1,37 @@
 # GymTrack Pro — PRD
 
-## Original problem statement
-"En base a ese codigo añade un calendario donde se pueda guardar los entrenos" + "rediseña la app con una interfaz mas moderna".
+## Problem statement
+1. "En base a ese codigo añade un calendario donde se pueda guardar los entrenos"
+2. "rediseña la app con una interfaz mas moderna"
+3. "Rediseña la pantalla de inicio y mete los ejercicios de entrenos rapidos en las categorias por niveles"
 
-## Stack (given codebase)
-- Expo + React Native Web (expo-router), UI via `@blinkdotnew/mobile-ui` (Tamagui).
-- Backend/DB/Auth via **Blink SDK** (`@blinkdotnew/sdk`) → Blink cloud (`blink.new` / `core.blink.new`). No local FastAPI/Mongo used.
-- Runs as frontend at `/app/frontend`, served on port 3000 via `expo start --web` (supervisor `frontend`). `start` script edited to serve web on 3000.
+## Stack (IMPORTANT — non-standard)
+- Expo + React Native Web (expo-router), Tamagui via `@blinkdotnew/mobile-ui`.
+- Backend = **Blink SDK** (`@blinkdotnew/sdk`): hosted DB + email/password auth at `https://blink.new` / `https://core.blink.new`. projectId `gymtrack-mobile-app-u6wmrz3v` (in `lib/blink.ts`).
+- App lives in `/app/frontend`; supervisor runs `yarn start` → `expo start --web --port 3000`.
+- No FastAPI/Mongo used. `/app/backend` intentionally unused (its supervisor stays FATAL, harmless).
 
-## User choices
-- Calendar: both month + week views.
-- Per-entry data: date + notes + duration.
-- Auth: with login (reuses existing Blink email/password auth).
-- Design: modernize freely.
+## User personas
+- Gym-goers tracking workouts, logging sessions per day, following level-based workout presets.
+
+## Core requirements (static)
+- Calendar to save/review workouts by day (login required), fields: date + notes + duration. Month + week views.
+- Modern UI ("Performance Pro": Obsidian #09090B + Volt Lime #D4FF00).
+- Home shows quick workouts grouped inside level categories with exercise lists.
 
 ## Implemented (2026-07-27)
-- **Calendar tab** (`app/(tabs)/calendar.tsx`): month grid + week list toggle, workout dots, day selection.
-  - Quick-log modal: Nombre + Duración (min) + Notas → saved to Blink `sessions` with chosen date (`startedAt`).
-  - Edit + delete existing entries; opens full session (if it has exercises/volume).
-- **DB hooks** (`hooks/useDatabase.ts`): `useQuickLogSession`, `useUpdateSession`; `useCreateSession` now accepts `startedAt`; added minimal `useUserExercises` (fixes previously-broken Ayuda tab import).
-- **Nav** (`app/(tabs)/_layout.tsx`): registered Calendario (Calendar icon) + Ayuda (Info icon) tabs; volt/obsidian tab bar.
-- **`session/new`** now honors `?date=` param → dates the session correctly.
-- **Redesign — "Performance Pro" (Obsidian #09090B + Volt Lime #D4FF00)**: shared palette `constants/theme.ts`; rebuilt Home (`index.tsx`) with hero image + gradient, bento stats, pill CTAs; restyled Calendar; restyled auth form (`profile.tsx`) with volt pill + data-testids.
+- **Calendar** (`app/(tabs)/calendar.tsx`): month grid + week list toggle, day dots, quick-log modal (name/duration/notes) via `useQuickLogSession`, edit via `useUpdateSession`, delete via `useDeleteSession`. Saves to Blink `sessions` with custom `startedAt`. VERIFIED e2e (201 create, persists after reload).
+- **Tab nav** (`app/(tabs)/_layout.tsx`): added Calendario + Ayuda tabs, Volt tab bar.
+- **Home redesign** (`app/(tabs)/index.tsx`): hero image + gradient, bento stats, expandable level categories (accordion) each listing presets + exercises, Volt pill CTAs. Recent session + auth CTA.
+- **Theme** (`constants/theme.ts`): shared Obsidian+Volt palette `C`.
+- **DB hooks** (`hooks/useDatabase.ts`): `useQuickLogSession`, `useUpdateSession`, `useUserExercises` (fixes broken Help tab), `useCreateSession` now accepts optional `startedAt`.
+- **session/new.tsx**: respects `?date=` param → startedAt on that day.
+- Profile auth already had Volt styling + data-testids.
 
-## Verified (direct browser automation)
-- Blink signup/signin return tokens (HTTP 200). Login → authenticated profile.
-- Logged-in: add workout → renders name + "55 min" + notes; volt dot on day; Edit action. No page errors on any tab (incl. Ayuda).
+## Verification
+- Verified with headless chromium (playwright-core in /tmp) since screenshot_tool mis-paints slow Expo web loads. Blink signup → 200, tokens stored; calendar create → 201; reload persistence OK.
 
 ## Backlog / Next
-- P1: Apply the volt/obsidian palette to History, Templates, Progress, Session screens (currently default dark theme, functional but not fully restyled).
-- P2: Load Oswald/Manrope Google fonts for the condensed/geometric type from the guidelines.
-- P2: Week-view: allow inline edit + swipe actions; month-view multi-dot color coding by volume.
-- P2: Calendar summary stats (streak, weekly minutes).
+- P1: Restyle remaining screens (History, Templates, Progress, Session detail) to Volt/Obsidian for full cohesion (currently inherit default dark theme + Volt tab bar/chrome).
+- P2: Load Oswald/Manrope fonts (@expo-google-fonts) for condensed headline look.
+- P2: Calendar — edit workout date; month summary (total volume/entrenos).
