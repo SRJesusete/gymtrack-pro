@@ -1,45 +1,44 @@
 # GymTrack Pro — PRD
 
-## Problem statement
+## Problem statement (histórico)
 1. "En base a ese codigo añade un calendario donde se pueda guardar los entrenos"
 2. "rediseña la app con una interfaz mas moderna"
 3. "Rediseña la pantalla de inicio y mete los ejercicios de entrenos rapidos en las categorias por niveles"
+4. "Rediseña el apartado de ayuda y modernizalo"
+5. "Rediseña la app y elimina toda referencia de blink" (migración completa)
 
-## Stack (IMPORTANT — non-standard)
-- Expo + React Native Web (expo-router), Tamagui via `@blinkdotnew/mobile-ui`.
-- Backend = **Blink SDK** (`@blinkdotnew/sdk`): hosted DB + email/password auth at `https://blink.new` / `https://core.blink.new`. projectId `gymtrack-mobile-app-u6wmrz3v` (in `lib/blink.ts`).
-- App lives in `/app/frontend`; supervisor runs `yarn start` → `expo start --web --port 3000`.
-- No FastAPI/Mongo used. `/app/backend` intentionally unused (its supervisor stays FATAL, harmless).
+## Stack ACTUAL (desde 2026-07-28 — reconstrucción total)
+- **Frontend**: React web estándar (Create React App / react-scripts) + Tailwind CSS + lucide-react + recharts + framer-motion + sonner + react-router-dom. En `/app/frontend/src`. Supervisor corre `yarn start` en puerto 3000.
+- **Backend**: FastAPI + MongoDB (motor) en `/app/backend/server.py`, puerto 8001, prefijo `/api`.
+- **Auth**: JWT propio (email/contraseña, bcrypt) + Emergent Google Auth. Ambos emiten un JWT (7 días) guardado en localStorage `gymtrack_token`, enviado como `Authorization: Bearer`.
+- **DB**: MongoDB local, DB_NAME=gymtrack. Colecciones: users, exercises (46 sembrados), user_exercises, templates, sessions, personal_records.
+- **Blink ELIMINADO por completo** (SDK, Expo, Tamagui, todos los hooks). Se exportaron las 46 ejercicios públicas y se sembraron en Mongo (`/app/backend/seed_exercises.json`).
 
-## User personas
-- Gym-goers tracking workouts, logging sessions per day, following level-based workout presets.
+## Diseño
+- Volt/Obsidian pulido. Tokens en `tailwind.config.js` + `design_guidelines.json`. Fondo Obsidian #09090B, superficies #141414, acento Volt Lime #D4FF00, Oswald (headings) + Manrope (body). Colores por grupo muscular. Nav superior en desktop, inferior en móvil.
 
-## Core requirements (static)
-- Calendar to save/review workouts by day (login required), fields: date + notes + duration. Month + week views.
-- Modern UI ("Performance Pro": Obsidian #09090B + Volt Lime #D4FF00).
-- Home shows quick workouts grouped inside level categories with exercise lists.
+## Endpoints (todos /api)
+- Auth: POST /auth/register, /auth/login, /auth/google/session, GET /auth/me, POST /auth/logout
+- GET /exercises (público, 46)
+- GET/POST /user-exercises
+- GET/POST /templates, GET/DELETE /templates/{id}
+- GET /sessions, POST /sessions (entreno completo + detección PR), POST /sessions/quick (quick-log calendario), GET/PUT/DELETE /sessions/{id}
+- GET /personal-records
 
-## Implemented (2026-07-27)
-- **Calendar** (`app/(tabs)/calendar.tsx`): month grid + week list toggle, day dots, quick-log modal (name/duration/notes) via `useQuickLogSession`, edit via `useUpdateSession`, delete via `useDeleteSession`. Saves to Blink `sessions` with custom `startedAt`. VERIFIED e2e (201 create, persists after reload).
-- **Tab nav** (`app/(tabs)/_layout.tsx`): added Calendario + Ayuda tabs, Volt tab bar.
-- **Home redesign** (`app/(tabs)/index.tsx`): hero image + gradient, bento stats, expandable level categories (accordion) each listing presets + exercises, Volt pill CTAs. Recent session + auth CTA.
-- **Theme** (`constants/theme.ts`): shared Obsidian+Volt palette `C`.
-- **DB hooks** (`hooks/useDatabase.ts`): `useQuickLogSession`, `useUpdateSession`, `useUserExercises` (fixes broken Help tab), `useCreateSession` now accepts optional `startedAt`.
-- **session/new.tsx**: respects `?date=` param → startedAt on that day.
-- Profile auth already had Volt styling + data-testids.
+## Pantallas frontend
+Inicio (hero+stats+acordeones por nivel con presets), Calendario (mes/semana, quick-log, filtros, distribución), Historial, Plantillas (crear/usar), Progreso (rango Mes/Año/Todo, gráfica volumen recharts, distribución, PRs), Ayuda (biblioteca + buscador + filtros + consejos), Cuenta (login/registro/Google + perfil), SessionNew (registrar entreno con series), SessionDetail.
 
-## Verification
-- Verified with headless chromium (playwright-core in /tmp) since screenshot_tool mis-paints slow Expo web loads. Blink signup → 200, tokens stored; calendar create → 201; reload persistence OK.
+## Estado / Verificación (2026-07-28)
+- Reconstrucción completa VERIFICADA por testing_agent: Backend 100% (14/14 pytest), Frontend 100% e2e (auth, home, sesión con PR, calendario, historial, progreso, plantillas, ayuda; rutas protegidas redirigen a /cuenta).
+- Fix aplicado: detección de PR ahora crea 1 solo PR por ejercicio/sesión (la serie más pesada), verificado por curl.
+- Report: `/app/test_reports/iteration_2.json`. Tests backend en `/app/backend/tests/backend_test.py`.
 
-## Backlog / Next
-- DONE (2026-07-27 code-review): CRITICAL security fix — removed `dangerouslySetInnerHTML`, fonts now injected via document.createElement in `useWebFonts()` (verified by testing_agent, no serif fallback/blank). Hoisted tabs `SCREEN_OPTIONS` + `STACK_OPTIONS` consts; memoized Progreso `totalVolumeAll`; fixed SVG `<Polyline>` receiving a path string (now x,y pairs) removing a console error. Deliberately skipped large component-splits and exhaustive-deps noise (module-level consts/types) to avoid regressions on the verified app.
-- DONE (2026-07-27): quick-log optional kg (Volumen total) field in calendar modal -> stored in `totalVolume`. Populates calendar KG summary, session kg badge, Progreso TypeDistribution(volume) + volume line 'Total' (combinedRunning now sums all sessions' volume). Verified e2e (2,500 kg).
-- DONE (2026-07-27 P2): Progreso range filter (Mes/Año/Todo, `range` state -> `rangedSessions`/`chartSessions`) feeding volume chart + TypeDistribution. TypeDistribution bars now tappable (`onSelectType`/`selectedType`): on Calendar toggles `filterType` (syncs chips); on Progreso filters the volume chart by type with highlight + 'quitar filtro'. Verified e2e.
-- DONE (2026-07-27 P2): DatePicker in add/edit modal (mobile-ui `DatePicker`, value=Date) replacing the text date field. Startedat = chosen date + preserved time-of-day.
-- DONE (2026-07-27 P2): "Distribución por tipo" mini bar chart on calendar (per-type count/minutes/kg for current Mes/Semana, `typeStats`). Colored bars by type.
-- DONE (2026-07-27 P2): Edit workout date + filter calendar by type (type encoded in `notes` via `::tipo=` since Blink sessions schema is fixed). Colored chips/dots/badges.
-- DONE (2026-07-27 P2): Oswald headings + Manrope body (Google Fonts CDN in `app/_layout.tsx`).
-- DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos).
-- DONE (2026-07-27 P1): Restyled History, Templates, Progress, and Session (new/[id]) screens to Volt/Obsidian palette (token swap $color*/$orange9 -> `C`) + Oswald/Manrope (global). Muscle-group/PR/warmup accents kept as color variety. Verified render, no errors.
-- DONE (2026-07-27 P2): Reused TypeDistribution chart on Progreso (`components/TypeDistribution.tsx`, metric="volume" all-time). Verified.
-- DONE (2026-07-28): Ayuda redesign (`app/(tabs)/help.tsx`) — Volt/Obsidian + Oswald/Manrope. Pill search (`help-search-input`), stats bento (46 ejercicios / 6 grupos), colored muscle-group filter chips (`help-filter-*`), exercise cards with left color accent, expandable técnica/errores tips (`help-tips-toggle-*`), info + YouTube video buttons. Verified e2e (render + filter Piernas + tips toggle, no console errors, fonts intact).
+## Backlog / Next (P1/P2)
+- P2: `durationMinutes` en POST /sessions es auto-calculado (len*5); permitir que el cliente envíe la duración real del entreno completo.
+- P2: Migrar `@app.on_event('startup')` a lifespan (deprecación FastAPI).
+- P2 (UX/testabilidad): dar contenedor de scroll propio al picker de ejercicios en /sesion/nueva (el header sticky intercepta clics en desktop).
+- P3 (seguridad): JWT en localStorage es vulnerable a XSS; evaluar cookie httpOnly (ya hay fallback de cookie en get_current_user).
+- P3: editar/borrar plantillas con ejercicios personalizados; añadir ejercicios personalizados desde la UI (endpoint /user-exercises ya existe).
+
+## Credenciales de prueba
+Ver `/app/memory/test_credentials.md` (demo@gymtrack.pro / demo1234).

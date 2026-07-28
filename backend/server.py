@@ -339,28 +339,34 @@ async def create_session(body: SessionCreate, user: dict = Depends(get_current_u
     ex_docs = []
     new_prs = []
     for i, ex in enumerate(body.exercises):
+        # heaviest working set for this exercise in this session
+        max_weight = max((s.weight for s in ex.sets), default=0)
+        prev = await db.personal_records.find_one(
+            {"user_id": uid, "exerciseId": ex.exerciseId, "prType": "weight"},
+            sort=[("prValue", -1)],
+        )
+        prev_best = prev["prValue"] if prev else 0
+        pr_this_exercise = max_weight > prev_best and max_weight > 0
+        pr_set_marked = False
+        if pr_this_exercise:
+            pr = {
+                "id": f"pr_{uuid.uuid4().hex[:12]}",
+                "user_id": uid,
+                "exerciseId": ex.exerciseId,
+                "exerciseName": ex.exerciseName,
+                "prType": "weight",
+                "prValue": max_weight,
+                "sessionId": sid,
+                "achievedAt": started,
+            }
+            await db.personal_records.insert_one(pr)
+            new_prs.append(ex.exerciseName)
         set_docs = []
         for j, s in enumerate(ex.sets):
             is_pr = False
-            prev = await db.personal_records.find_one(
-                {"user_id": uid, "exerciseId": ex.exerciseId, "prType": "weight"},
-                sort=[("prValue", -1)],
-            )
-            prev_best = prev["prValue"] if prev else 0
-            if s.weight > prev_best and s.weight > 0:
+            if pr_this_exercise and not pr_set_marked and s.weight == max_weight:
                 is_pr = True
-                pr = {
-                    "id": f"pr_{uuid.uuid4().hex[:12]}",
-                    "user_id": uid,
-                    "exerciseId": ex.exerciseId,
-                    "exerciseName": ex.exerciseName,
-                    "prType": "weight",
-                    "prValue": s.weight,
-                    "sessionId": sid,
-                    "achievedAt": started,
-                }
-                await db.personal_records.insert_one(pr)
-                new_prs.append(ex.exerciseName)
+                pr_set_marked = True
             set_docs.append({
                 "setNumber": j + 1,
                 "weight": s.weight,
