@@ -83,8 +83,6 @@ async def get_current_user(request: Request) -> dict:
     if auth_header.startswith("Bearer "):
         token = auth_header[7:]
     if not token:
-        token = request.cookies.get("access_token")
-    if not token:
         raise HTTPException(status_code=401, detail="No autenticado")
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
