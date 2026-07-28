@@ -42,3 +42,4 @@
 - DONE (2026-07-27 P2): Calendar period summary bento (entrenos · kg · minutos).
 - DONE (2026-07-27 P1): Restyled History, Templates, Progress, and Session (new/[id]) screens to Volt/Obsidian palette (token swap $color*/$orange9 -> `C`) + Oswald/Manrope (global). Muscle-group/PR/warmup accents kept as color variety. Verified render, no errors.
 - DONE (2026-07-27 P2): Reused TypeDistribution chart on Progreso (`components/TypeDistribution.tsx`, metric="volume" all-time). Verified.
+- DONE (2026-07-28): Ayuda redesign (`app/(tabs)/help.tsx`) — Volt/Obsidian + Oswald/Manrope. Pill search (`help-search-input`), stats bento (46 ejercicios / 6 grupos), colored muscle-group filter chips (`help-filter-*`), exercise cards with left color accent, expandable técnica/errores tips (`help-tips-toggle-*`), info + YouTube video buttons. Verified e2e (render + filter Piernas + tips toggle, no console errors, fonts intact).
