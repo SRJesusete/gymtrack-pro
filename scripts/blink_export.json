@@ -1,0 +1,326 @@
+{
+  "exercises": [
+    {
+      "id": "ex_db_fly",
+      "name": "Aperturas con Mancuernas",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": "Aperturas en banco plano con mancuernas"
+    },
+    {
+      "id": "ex_cable_cross",
+      "name": "Cruce de Poleas",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": "Cruce de poleas altas para pectoral"
+    },
+    {
+      "id": "ex_crunch",
+      "name": "Crunch Abdominal",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_concentration_curl",
+      "name": "Curl Concentrado",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_curl_femoral",
+      "name": "Curl Femoral",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Curl de pierna tumbado en maquina"
+    },
+    {
+      "id": "ex_barbell_curl",
+      "name": "Curl de Bíceps",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": "Curl de bíceps con barra"
+    },
+    {
+      "id": "ex_pullups",
+      "name": "Dominadas",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": "Dominadas en barra fija"
+    },
+    {
+      "id": "ex_front_raise",
+      "name": "Elevaciones Frontales",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_lateral_raise",
+      "name": "Elevaciones Laterales",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": "Elevaciones laterales con mancuernas"
+    },
+    {
+      "id": "ex_cable_lateral",
+      "name": "Elevación Lateral en Polea",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_leg_raise",
+      "name": "Elevación de Piernas",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_hanging_leg_raise",
+      "name": "Elevación en Barra",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_shrugs",
+      "name": "Encogimientos",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_quad_extension",
+      "name": "Extension de Cuadriceps",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Extension de rodilla en maquina"
+    },
+    {
+      "id": "ex_tricep_pushdown",
+      "name": "Extensión de Tríceps en Polea",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_face_pull",
+      "name": "Face Pull",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": "Jalon hacia la cara en polea alta para rotadores"
+    },
+    {
+      "id": "ex_pushups",
+      "name": "Flexiones",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_dips",
+      "name": "Fondos",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_calf_press",
+      "name": "Gemelos en Prensa",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Elevacion de talones en prensa"
+    },
+    {
+      "id": "ex_russian_twist",
+      "name": "Giro Ruso",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_hip_thrust",
+      "name": "Hip Thrust",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Empuje de cadera con barra para gluteo"
+    },
+    {
+      "id": "ex_lat_pulldown",
+      "name": "Jalón al Pecho",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": "Jalón al pecho en polea alta"
+    },
+    {
+      "id": "ex_hammer_curl",
+      "name": "Martillo",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_rear_delt_fly",
+      "name": "Pajaro con Mancuernas",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": "Apertura posterior inclinada con mancuernas"
+    },
+    {
+      "id": "ex_pec_deck",
+      "name": "Peck Deck",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_deadlift",
+      "name": "Peso Muerto",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": "Peso muerto convencional con barra"
+    },
+    {
+      "id": "ex_plank",
+      "name": "Plancha Abdominal",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": "Plancha isométrica abdominal"
+    },
+    {
+      "id": "ex_leg_press",
+      "name": "Prensa de Piernas",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Prensa inclinada de piernas"
+    },
+    {
+      "id": "ex_arnold_press",
+      "name": "Press Arnold",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": "Press rotacional con mancuernas"
+    },
+    {
+      "id": "ex_bench_press",
+      "name": "Press Banca",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": "Press de banca con barra en banco plano"
+    },
+    {
+      "id": "ex_decline_bench",
+      "name": "Press Banca Declinado",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_incline_bench",
+      "name": "Press Banca Inclinado",
+      "muscleGroup": "Pecho",
+      "category": "strength",
+      "description": "Press de banca con barra en banco inclinado"
+    },
+    {
+      "id": "ex_french_press",
+      "name": "Press Francés",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": "Press francés para tríceps con mancuerna"
+    },
+    {
+      "id": "ex_skull_crusher",
+      "name": "Press Francés Acostado",
+      "muscleGroup": "Brazos",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_ohp",
+      "name": "Press Militar",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": "Press militar con barra sentado"
+    },
+    {
+      "id": "ex_glute_bridge",
+      "name": "Puente de Glúteos",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_pullover",
+      "name": "Pullover",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_tbar_row",
+      "name": "Remo T-Bar",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_upright_row",
+      "name": "Remo al Cuello",
+      "muscleGroup": "Hombros",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_barbell_row",
+      "name": "Remo con Barra",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": "Remo con barra en banco inclinado"
+    },
+    {
+      "id": "ex_dumbbell_row",
+      "name": "Remo con Mancuerna",
+      "muscleGroup": "Espalda",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_ab_rollout",
+      "name": "Rueda Abdominal",
+      "muscleGroup": "Core",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_squat",
+      "name": "Sentadilla",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": "Sentadilla libre con barra"
+    },
+    {
+      "id": "ex_bulgarian_split",
+      "name": "Sentadilla Búlgara",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_wall_sit",
+      "name": "Sentadilla Isométrica",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": ""
+    },
+    {
+      "id": "ex_lunges",
+      "name": "Zancadas",
+      "muscleGroup": "Piernas",
+      "category": "strength",
+      "description": ""
+    }
+  ]
+}
