@@ -34,6 +34,7 @@ Inicio (hero+stats+acordeones por nivel con presets), Calendario (mes/semana, qu
 - Report: `/app/test_reports/iteration_2.json`. Tests backend en `/app/backend/tests/backend_test.py`.
 
 ## Backlog / Next (P1/P2)
+- DONE (2026-07-28 seguridad): Auditoría de seguridad → PASS. Aplicado: eliminado fallback de cookie muerto en get_current_user; añadido backend/.gitignore (excluye .env). Implementado **rate limiting** en auth: login con bloqueo por fuerza bruta (5 fallos por ip:email → 15 min, se limpia al acierto), register (10/15min por IP) y google/session (20/15min por IP), con índices TTL en login_attempts y rate_limits. Verificado por curl (6º intento → 429; reset al login correcto).
 - P2: `durationMinutes` en POST /sessions es auto-calculado (len*5); permitir que el cliente envíe la duración real del entreno completo.
 - P2: Migrar `@app.on_event('startup')` a lifespan (deprecación FastAPI).
 - P2 (UX/testabilidad): dar contenedor de scroll propio al picker de ejercicios en /sesion/nueva (el header sticky intercepta clics en desktop).

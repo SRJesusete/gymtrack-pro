@@ -172,9 +172,71 @@ class UserExerciseCreate(BaseModel):
     description: Optional[str] = ""
 
 
+# ---------- rate limiting ----------
+LOCKOUT_THRESHOLD = 5
+LOCKOUT_MINUTES = 15
+
+
+def client_ip(request: Request) -> str:
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _aware(dt):
+    if isinstance(dt, str):
+        dt = datetime.fromisoformat(dt)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+async def rate_limit(identifier: str, limit: int, window_min: int = LOCKOUT_MINUTES):
+    """Sliding fixed-window limiter. Raises 429 when limit exceeded."""
+    now = datetime.now(timezone.utc)
+    rec = await db.rate_limits.find_one({"identifier": identifier})
+    if rec and (now - _aware(rec["window_start"])) < timedelta(minutes=window_min):
+        if rec["count"] >= limit:
+            raise HTTPException(status_code=429, detail="Demasiados intentos. Espera unos minutos e inténtalo de nuevo.")
+        await db.rate_limits.update_one({"identifier": identifier}, {"$inc": {"count": 1}})
+        return
+    await db.rate_limits.update_one(
+        {"identifier": identifier},
+        {"$set": {"identifier": identifier, "count": 1, "window_start": now, "expires_at": now + timedelta(minutes=window_min)}},
+        upsert=True,
+    )
+
+
+async def check_login_lockout(identifier: str):
+    rec = await db.login_attempts.find_one({"identifier": identifier})
+    if rec and rec.get("locked_until"):
+        lu = _aware(rec["locked_until"])
+        if lu > datetime.now(timezone.utc):
+            mins = int((lu - datetime.now(timezone.utc)).total_seconds()) // 60 + 1
+            raise HTTPException(status_code=429, detail=f"Demasiados intentos fallidos. Inténtalo de nuevo en {mins} min.")
+
+
+async def record_login_failure(identifier: str):
+    now = datetime.now(timezone.utc)
+    rec = await db.login_attempts.find_one({"identifier": identifier})
+    count = (rec["count"] if rec and (now - _aware(rec["window_start"])) < timedelta(minutes=LOCKOUT_MINUTES) else 0) + 1
+    update = {"identifier": identifier, "count": count, "window_start": rec["window_start"] if rec and count > 1 else now, "expires_at": now + timedelta(minutes=LOCKOUT_MINUTES)}
+    if count >= LOCKOUT_THRESHOLD:
+        update["locked_until"] = now + timedelta(minutes=LOCKOUT_MINUTES)
+        update["count"] = 0
+        update["window_start"] = now
+    await db.login_attempts.update_one({"identifier": identifier}, {"$set": update}, upsert=True)
+
+
+async def clear_login_attempts(identifier: str):
+    await db.login_attempts.delete_one({"identifier": identifier})
+
+
 # ---------- auth routes ----------
 @api.post("/auth/register")
-async def register(body: RegisterReq):
+async def register(request: Request, body: RegisterReq):
+    await rate_limit(f"register:{client_ip(request)}", limit=10)
     email = body.email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Este email ya está registrado")
@@ -194,17 +256,22 @@ async def register(body: RegisterReq):
 
 
 @api.post("/auth/login")
-async def login(body: LoginReq):
+async def login(request: Request, body: LoginReq):
     email = body.email.lower().strip()
+    ident = f"login:{client_ip(request)}:{email}"
+    await check_login_lockout(ident)
     user = await db.users.find_one({"email": email})
     if not user or not user.get("password_hash") or not verify_password(body.password, user["password_hash"]):
+        await record_login_failure(ident)
         raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+    await clear_login_attempts(ident)
     token = create_token(user["user_id"], email)
     return {"token": token, "user": public_user(user)}
 
 
 @api.post("/auth/google/session")
-async def google_session(body: GoogleSessionReq):
+async def google_session(request: Request, body: GoogleSessionReq):
+    await rate_limit(f"google:{client_ip(request)}", limit=20)
     async with httpx.AsyncClient(timeout=15) as hc:
         r = await hc.get(EMERGENT_SESSION_URL, headers={"X-Session-ID": body.session_id})
     if r.status_code != 200:
@@ -458,6 +525,10 @@ async def startup():
     await db.sessions.create_index("user_id")
     await db.templates.create_index("user_id")
     await db.personal_records.create_index("user_id")
+    await db.login_attempts.create_index("identifier", unique=True)
+    await db.login_attempts.create_index("expires_at", expireAfterSeconds=0)
+    await db.rate_limits.create_index("identifier", unique=True)
+    await db.rate_limits.create_index("expires_at", expireAfterSeconds=0)
     # seed exercises if empty
     count = await db.exercises.count_documents({})
     if count == 0:
