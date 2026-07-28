@@ -1,0 +1,34 @@
+{
+  "summary": "Tested new GymTrack Pro stack (FastAPI + MongoDB + React CRA) end-to-end. Backend: 14/14 pytest cases passed covering auth (register/login/me/401), public exercises, templates CRUD, full session create with PR detection & totalVolume, quick-log, sessions CRUD, personal-records, and unauth 401s. Frontend: verified on mobile viewport (390x844) with fresh registered user - register+login+logout, home hero+stats bento+level accordions+presets, preset->/sesion/nueva prefill, session create with sets producing PR badge and volume, calendar quick-log, filter+view toggles present, history listing (2 sessions), progress chart+PR, templates create+start, help search+filters(7)+tips(46). Protected routes redirect to /cuenta when logged out. Google login button present when logged out. No visible 'blink' text in DOM/attributes (only 'BlinkMacSystemFont' inside default Tailwind font-family stack, which is a browser rendering-engine token, not a Blink SDK reference).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "SessionNew exercise picker", "issue": "Some exercise items in the picker list are outside the initial viewport on desktop and the sticky top header can intercept pointer events on scroll; standard Playwright click gets 'subtree intercepts pointer events' or 'Element is outside of the viewport'. Works via JS click / scroll_into_view + force. Real users can scroll inside the picker but the modal/list should preferably use a scrollable container that doesn't require the whole page to scroll under the sticky header.", "selector": "[data-testid^='session-pick-']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Header (desktop)", "issues": ["Sticky top nav overlaps content on session-new picker; consider adding scroll-margin-top or making the picker a proper modal with its own scroll container"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: make exercise picker in /sesion/nueva a scroll-contained modal (or add CSS scroll-margin-top on picker items) so items don't scroll under the sticky header. Functional but bad for testability/UX on desktop.",
+    "Router future flag warnings in console (React Router v7 startTransition & relativeSplatPath) - noise only, non-blocking."
+  ],
+  "critical_code_review_comments": [
+    "server.py: get_current_user also accepts token from 'access_token' cookie, but /api/auth/login does not set that cookie and CORS allow_credentials=False - cookie path is effectively dead code; either implement httpOnly cookie login or remove cookie fallback.",
+    "server.py: durationMinutes for POST /api/sessions is auto-computed as max(1, len(exercises)*5) - no way for client to send actual duration for full sessions (only quick-log accepts it). Might surprise users editing later.",
+    "server.py PR detection: iterates all sets of an exercise and inserts a PR for every set that exceeds previous best (queried at loop start). Since the query happens before each set insert, multiple PRs may be created within the same session if weights ascend across sets; consider computing once per exercise or per session.",
+    "server.py: uses deprecated @app.on_event('startup'); FastAPI recommends lifespan context managers.",
+    "CORS_ORIGINS='*' with allow_credentials=False is OK but move to lifespan/config with real origins in prod.",
+    "Frontend: token in localStorage ('gymtrack_token') is XSS-vulnerable; consider httpOnly cookie flow (matches the unused server cookie fallback)."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Created fresh users at runtime: uitest_<uuid>@gymtrack.pro / TestPass1234. Existing demo account demo@gymtrack.pro / demo1234 also works if seeded.",
+  "seed_data_creation": "Test user accounts + a few TEST_ sessions/templates created via API and UI. Not cleaned up (isolated per random email).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend fully covered by /app/backend/tests/backend_test.py (pytest, 14 tests). For frontend, prefer mobile viewport (390x844) for testing session picker/template picker because desktop sticky header intercepts picker clicks. Use JS click fallback (document.querySelector('[data-testid^=session-pick-]').click()) when Playwright scroll_into_view fails. Blink false-positive: 'BlinkMacSystemFont' appears in default font-family CSS - not a real Blink SDK reference; scan visible text only.",
+  "rca of the issue": "N/A - no blocking issues found. The session-picker click-intercept issue is caused by a sticky <header> above the picker section; when Playwright scrolls the button into view, it ends up under the header's z-index. Mitigation: give the picker its own scroll container (max-height + overflow-y-auto) so page-level scroll isn't required, OR add 'scroll-margin-top: 5rem' on session-pick buttons."
+}
