@@ -30,8 +30,8 @@ export default function ProfileScreen() {
       setAuthError('Las contraseñas no coinciden');
       return;
     }
-    if (password.length < 6) {
-      setAuthError('La contraseña debe tener al menos 6 caracteres');
+    if (password.length < 8) {
+      setAuthError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
     setAuthBusy(true);
