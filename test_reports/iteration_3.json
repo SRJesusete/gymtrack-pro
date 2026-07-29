@@ -1,0 +1,31 @@
+{
+  "summary": "Focused regression on iteration_2 changes: auth rate limiting, PR-per-exercise (1 PR = heaviest set), Bearer-only auth (cookie fallback removed). Backend: 20/20 pytest cases pass (added 6 new tests: 3 rate-limit, 1 PR-detection, 1 user-isolation, 1 cookie-removal). Frontend (mobile 390x844): fresh register+login+profile+logout OK; 6 failed logins in the UI show exactly 'Demasiados intentos fallidos. Inténtalo de nuevo en 15 min.' inside [data-testid=auth-error] on attempt 6 (attempts 1-5 = 401 'Email o contraseña incorrectos', attempt 6 = 429 lockout message). google-login-btn present when logged out. Protected route /calendario redirects to /cuenta when unauthenticated. All previously verified flows (home hero/stats/level accordions/presets, session create with PR, calendar quick-log, history, progress, templates, help) already 100% in iteration_2 — no regressions detected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SessionNew exercise picker (desktop)", "issues": ["Carry-over from iteration_2: sticky header can intercept picker clicks on desktop; JS click / mobile viewport works. Not a regression."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py rate_limit(): the sliding-window is actually a *fixed* window (window_start not shifted per request). Fine for auth abuse control, but the docstring says 'sliding' — misleading naming.",
+    "server.py record_login_failure(): when the previous record is outside the window, `rec['window_start']` used in the update dict is the STALE old timestamp because the ternary `rec['window_start'] if rec and count > 1 else now` still reads from `rec`. Since count is reset to 1 in that branch, `count > 1` is False and `now` is used — so behaviour is correct, but the expression is confusing; consider `window_start = now if count == 1 else _aware(rec['window_start'])`.",
+    "server.py: register limit is 10 req/15min per IP. In a shared-IP / corporate-NAT scenario this can legitimately block real users. Consider raising the limit or scoping by IP+email hash.",
+    "server.py: `_aware(dt)` accepts strings but rate_limit stores `window_start` as datetime; login_attempts also stores datetime. Fine, but keep serialization consistent (both go through Mongo BSON so both should be tz-aware).",
+    "server.py: after 5 failures the code sets locked_until=now+15min AND resets count=0. If the user keeps hammering during the lockout, check_login_lockout returns 429 early (good), but if they wait 15min exactly, one wrong password will not create a new lockout for another 5 attempts. Documented behaviour, but ensure UX message is consistent (says '15 min', matches).",
+    "server.py PR fix looks correct now: max_weight per exercise per session, single PR insert, single set flagged isPr. Verified by test_one_pr_per_exercise_heaviest_set.",
+    "server.py: cookie fallback in get_current_user was removed as expected (verified via test_cookie_auth_no_longer_accepted). CORS allow_credentials still False, consistent.",
+    "server.py user-isolation: DELETE /sessions/{id} and /templates/{id} return 200 {'ok': true} even when nothing matched (foreign user or missing). Not a security issue (delete is a no-op) but inconsistent with GET/PUT which correctly return 404. Consider returning 404 when matched_count/deleted_count == 0 for symmetry."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py", "/app/test_reports/iteration_3.json"],
+  "success_rate": {"backend": "100% (20/20)", "frontend": "100% (all rechecked flows OK)"},
+  "test_credentials": "Fresh users registered at runtime (uitest_*, uirl_*, rl_*, iso_*, ck_* @gymtrack.pro / password TestPass1234|GoodPass1234|IsoPass1234|CkPass1234). NOTE: several email+IP identifiers are now locked for 15 min in login_attempts (uirl_*, rl_lock_*, rl_a_*). Existing demo@gymtrack.pro / demo1234 may still be locked from prior iterations — prefer fresh accounts.",
+  "seed_data_creation": "Test users + TEST_ sessions/templates created via API; sessions/templates cleaned up in-test where possible. Locked login_attempts rows will auto-expire after 15 min via TTL index.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite lives at /app/backend/tests/backend_test.py — run with `pytest backend/tests/backend_test.py -v --junitxml=/app/test_reports/pytest/pytest_results.xml`. It intentionally does NOT stress-test /auth/register rate limit from this IP because doing so would 429-block subsequent test registrations for 15 minutes. If you need to test the register limit, pick a dedicated IP or clear db.rate_limits first. For UI rate-limit, register a throwaway account then submit 6 wrong passwords — expect [data-testid=auth-error] to contain 'Demasiados intentos fallidos'.",
+  "rca of the issue": "N/A — all requested behaviours verified working. Rate limiting correctly enforces 5-failure lockout with reset-on-success, per (ip,email) identifier so other users on same IP are not affected. PR detection is now correctly 1-per-exercise/session on the heaviest set. Bearer-only auth confirmed."
+}
