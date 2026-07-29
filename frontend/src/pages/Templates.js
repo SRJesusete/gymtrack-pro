@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Trash2, ClipboardList, Check, Play } from "lucide-react";
 import { api, apiError } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { groupColor, MUSCLE_GROUPS } from "../constants/muscleGroups";
 import { Card, Overline, Loading, PrimaryButton } from "../components/ui";
+import { GuestBanner } from "../components/GuestBanner";
 import { Modal } from "../components/Modal";
 import { cn } from "../lib/utils";
 
 export default function Templates() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [templates, setTemplates] = useState([]);
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,11 +24,11 @@ export default function Templates() {
 
   const load = () => {
     Promise.all([
-      api.get("/templates").then((r) => r.data),
+      isAuthenticated ? api.get("/templates").then((r) => r.data).catch(() => []) : Promise.resolve([]),
       api.get("/exercises").then((r) => r.data),
     ]).then(([t, e]) => { setTemplates(t); setExercises(e); }).finally(() => setLoading(false));
   };
-  useEffect(load, []);
+  useEffect(load, [isAuthenticated]);
 
   const toggle = (ex) => {
     setPicked((prev) =>
@@ -69,10 +72,12 @@ export default function Templates() {
           <Overline>Rutinas</Overline>
           <h1 className="font-heading font-bold uppercase text-4xl sm:text-5xl tracking-tight leading-none mt-2">Plantillas</h1>
         </div>
-        <PrimaryButton onClick={() => setOpen(true)} data-testid="new-template-btn" className="!px-4 !py-2.5 text-sm">
+        <PrimaryButton onClick={() => (isAuthenticated ? setOpen(true) : navigate("/cuenta"))} data-testid="new-template-btn" className="!px-4 !py-2.5 text-sm">
           <Plus className="w-4 h-4" /> Nueva
         </PrimaryButton>
       </div>
+
+      {!isAuthenticated && <GuestBanner text="Inicia sesión para crear tus propias plantillas de entreno." />}
 
       {templates.length === 0 ? (
         <div className="py-16 flex flex-col items-center gap-3">

@@ -82,9 +82,9 @@ function AppRouter() {
         <Route path="/" element={<Home />} />
         <Route path="/ayuda" element={<Help />} />
         <Route path="/cuenta" element={<Account />} />
-        <Route path="/calendario" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+        <Route path="/calendario" element={<Calendar />} />
+        <Route path="/plantillas" element={<Templates />} />
         <Route path="/historial" element={<ProtectedRoute><History /></ProtectedRoute>} />
-        <Route path="/plantillas" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
         <Route path="/progreso" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
         <Route path="/sesion/nueva" element={<ProtectedRoute><SessionNew /></ProtectedRoute>} />
         <Route path="/sesion/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />

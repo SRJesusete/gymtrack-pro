@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { api, apiError } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { WORKOUT_TYPES, getTypeColor, getTypeLabel } from "../constants/workoutTypes";
 import { Card, Overline, Loading, Chip, PrimaryButton, StatCard } from "../components/ui";
+import { GuestBanner } from "../components/GuestBanner";
 import { Modal } from "../components/Modal";
 import { TypeDistribution } from "../components/TypeDistribution";
 import { cn, ymd, fmtNum } from "../lib/utils";
@@ -14,6 +17,8 @@ const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", 
 const inputCls = "w-full bg-bg border border-border rounded-lg px-4 py-3 text-txt placeholder-muted focus:outline-none focus:border-volt font-sans";
 
 export default function Calendar() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("month");
@@ -25,8 +30,11 @@ export default function Calendar() {
   const [form, setForm] = useState({ name: "", durationMinutes: "", notes: "", date: ymd(new Date()), workoutType: "fuerza", totalVolume: "" });
   const [saving, setSaving] = useState(false);
 
-  const load = () => api.get("/sessions").then(({ data }) => setSessions(data)).finally(() => setLoading(false));
-  useEffect(() => { load(); }, []);
+  const load = () => {
+    if (!isAuthenticated) { setSessions([]); setLoading(false); return; }
+    api.get("/sessions").then(({ data }) => setSessions(data)).finally(() => setLoading(false));
+  };
+  useEffect(() => { load(); }, [isAuthenticated]);
 
   const filtered = useMemo(
     () => (filterType ? sessions.filter((s) => (s.workoutType || "otro") === filterType) : sessions),
@@ -73,6 +81,7 @@ export default function Calendar() {
   }), [periodSessions]);
 
   const openAdd = (date) => {
+    if (!isAuthenticated) { navigate("/cuenta"); return; }
     setEditing(null);
     setForm({ name: "", durationMinutes: "", notes: "", date: ymd(date || new Date()), workoutType: "fuerza", totalVolume: "" });
     setOpen(true);
@@ -133,6 +142,8 @@ export default function Calendar() {
           <Plus className="w-4 h-4" /> Añadir
         </PrimaryButton>
       </div>
+
+      {!isAuthenticated && <GuestBanner text="Estás viendo el calendario como invitado. Inicia sesión para guardar tus entrenos." />}
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex gap-2">
