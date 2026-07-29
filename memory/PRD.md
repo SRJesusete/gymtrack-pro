@@ -34,7 +34,8 @@ Inicio (hero+stats+acordeones por nivel con presets), Calendario (mes/semana, qu
 - Report: `/app/test_reports/iteration_2.json`. Tests backend en `/app/backend/tests/backend_test.py`.
 
 ## Backlog / Next (P1/P2)
-- DONE (2026-07-29): Calendario y Plantillas ahora son visibles SIN registro (quitado ProtectedRoute). Como invitado se ve la UI completa con `GuestBanner` (componente nuevo `components/GuestBanner.js`) invitando a iniciar sesión; las acciones de guardar/crear (Añadir/Nueva) redirigen a /cuenta. Historial y Progreso siguen protegidos (datos personales). Verificado como invitado (sin redirección, banner presente).
+- DONE (2026-07-29): Calendario y Plantillas ahora son visibles SIN registro (quitado ProtectedRoute). Como invitado se ve la UI completa con `GuestBanner` (componente nuevo `components/GuestBanner.js`) invitando a iniciar sesión; las acciones de guardar/crear (Añadir/Nueva) redirigen a /cuenta. Verificado como invitado.
+- DONE (2026-07-29): Historial y Progreso TAMBIÉN visibles sin registro (mismo patrón: GuestBanner + estados vacíos + fetch solo si autenticado). Ya NO queda ninguna ruta protegida salvo /sesion/nueva y /sesion/:id (registrar/detalle requieren cuenta). Verificado como invitado.
 - DONE (2026-07-28 seguridad): Auditoría de seguridad → PASS. Aplicado: eliminado fallback de cookie muerto en get_current_user; añadido backend/.gitignore (excluye .env). Implementado **rate limiting** en auth: login con bloqueo por fuerza bruta (5 fallos por ip:email → 15 min, se limpia al acierto), register (10/15min por IP) y google/session (20/15min por IP), con índices TTL en login_attempts y rate_limits. Verificado por curl (6º intento → 429; reset al login correcto).
 - P2: `durationMinutes` en POST /sessions es auto-calculado (len*5); permitir que el cliente envíe la duración real del entreno completo.
 - P2: Migrar `@app.on_event('startup')` a lifespan (deprecación FastAPI).

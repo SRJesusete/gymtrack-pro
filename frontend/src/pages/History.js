@@ -2,18 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dumbbell, ArrowRight, Clock, Flame } from "lucide-react";
 import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { getTypeColor, getTypeLabel } from "../constants/workoutTypes";
 import { Card, Overline, Loading } from "../components/ui";
+import { GuestBanner } from "../components/GuestBanner";
 import { formatDate, fmtNum } from "../lib/utils";
 
 export default function History() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAuthenticated) { setSessions([]); setLoading(false); return; }
     api.get("/sessions").then(({ data }) => setSessions(data)).finally(() => setLoading(false));
-  }, []);
+  }, [isAuthenticated]);
 
   const grouped = useMemo(() => {
     const map = {};
@@ -30,6 +34,8 @@ export default function History() {
     <div className="animate-fade-up">
       <Overline>Registro</Overline>
       <h1 className="font-heading font-bold uppercase text-4xl sm:text-5xl tracking-tight leading-none mt-2 mb-8">Historial</h1>
+
+      {!isAuthenticated && <GuestBanner text="Inicia sesión para registrar entrenos y ver tu historial." />}
 
       {sessions.length === 0 ? (
         <div className="py-16 flex flex-col items-center gap-3 text-center">
