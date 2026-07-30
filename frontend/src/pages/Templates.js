@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Trash2, ClipboardList, Check, Play } from "lucide-react";
+import { Plus, Trash2, ClipboardList, Check, Play, Clock, BookmarkPlus } from "lucide-react";
 import { api, apiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { groupColor, MUSCLE_GROUPS } from "../constants/muscleGroups";
+import { WORKOUT_PRESETS } from "../constants/workoutPresets";
 import { Card, Overline, Loading, PrimaryButton } from "../components/ui";
 import { GuestBanner } from "../components/GuestBanner";
 import { Modal } from "../components/Modal";
@@ -57,6 +58,23 @@ export default function Templates() {
     setTemplates((t) => t.filter((x) => x.id !== id));
   };
 
+  const savePreset = async (preset) => {
+    if (!isAuthenticated) { navigate("/cuenta"); return; }
+    if (templates.some((t) => t.name === preset.name)) { toast.info("Ya tienes esta plantilla"); return; }
+    try {
+      await api.post("/templates", {
+        name: preset.name,
+        description: preset.description,
+        exercises: preset.exercises.map((e) => ({
+          exerciseId: e.exerciseId, exerciseName: e.exerciseName, muscleGroup: e.muscleGroup,
+          defaultSets: e.defaultSets, defaultReps: e.defaultReps,
+        })),
+      });
+      toast.success("Plantilla guardada en las tuyas");
+      load();
+    } catch (e) { toast.error(apiError(e)); }
+  };
+
   const byGroup = useMemo(() => {
     const map = {};
     for (const ex of exercises) (map[ex.muscleGroup || "Otros"] = map[ex.muscleGroup || "Otros"] || []).push(ex);
@@ -79,10 +97,49 @@ export default function Templates() {
 
       {!isAuthenticated && <GuestBanner text="Inicia sesión para crear tus propias plantillas de entreno." />}
 
+      {/* Default / example templates */}
+      <div className="mb-3"><Overline>Plantillas de ejemplo</Overline></div>
+      <div className="grid sm:grid-cols-2 gap-4 mb-10">
+        {WORKOUT_PRESETS.map((p) => (
+          <Card key={p.id} className="p-5" data-testid={`default-template-${p.id}`}>
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <p className="font-heading font-semibold uppercase text-xl">{p.name}</p>
+              <span className="flex items-center gap-1 text-xs text-muted font-sans shrink-0"><Clock className="w-3.5 h-3.5" /> {p.estimatedMinutes}′</span>
+            </div>
+            <p className="text-sub text-sm font-sans mb-3">{p.description}</p>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {p.exercises.map((e, i) => (
+                <span key={i} className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-full border" style={{ color: groupColor(e.muscleGroup), borderColor: groupColor(e.muscleGroup) + "55" }}>
+                  {e.exerciseName}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => (isAuthenticated ? navigate(`/sesion/nueva?preset=${p.id}`) : navigate("/cuenta"))}
+                data-testid={`default-start-${p.id}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-volt text-bg rounded-lg py-2.5 font-heading font-bold uppercase tracking-wide text-sm hover:bg-voltDim active:scale-95 transition-all"
+              >
+                <Play className="w-4 h-4" /> Empezar
+              </button>
+              <button
+                onClick={() => savePreset(p)}
+                data-testid={`default-save-${p.id}`}
+                title="Guardar en mis plantillas"
+                className="flex items-center justify-center gap-2 border border-border rounded-lg px-3 py-2.5 font-heading font-medium uppercase tracking-wide text-sm text-sub hover:text-txt hover:border-borderStrong active:scale-95 transition-all"
+              >
+                <BookmarkPlus className="w-4 h-4 text-volt" />
+              </button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mb-3"><Overline>Mis plantillas</Overline></div>
       {templates.length === 0 ? (
-        <div className="py-16 flex flex-col items-center gap-3">
+        <div className="py-12 flex flex-col items-center gap-3">
           <ClipboardList className="w-12 h-12 text-border" />
-          <p className="text-muted font-sans">No tienes plantillas todavía.</p>
+          <p className="text-muted font-sans">No tienes plantillas propias todavía. Guarda una de ejemplo o crea la tuya.</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
