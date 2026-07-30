@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Trash2, ClipboardList, Check, Play, Clock, BookmarkPlus } from "lucide-react";
+import { Plus, Trash2, ClipboardList, Check, Play, Clock, BookmarkPlus, Eye } from "lucide-react";
 import { api, apiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { groupColor, MUSCLE_GROUPS } from "../constants/muscleGroups";
@@ -22,6 +22,7 @@ export default function Templates() {
   const [desc, setDesc] = useState("");
   const [picked, setPicked] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState(null);
 
   const load = () => {
     Promise.all([
@@ -123,10 +124,18 @@ export default function Templates() {
                 <Play className="w-4 h-4" /> Empezar
               </button>
               <button
+                onClick={() => setPreview(p)}
+                data-testid={`default-preview-${p.id}`}
+                title="Vista previa"
+                className="flex items-center justify-center border border-border rounded-lg px-3 py-2.5 text-sub hover:text-txt hover:border-borderStrong active:scale-95 transition-all"
+              >
+                <Eye className="w-4 h-4 text-volt" />
+              </button>
+              <button
                 onClick={() => savePreset(p)}
                 data-testid={`default-save-${p.id}`}
                 title="Guardar en mis plantillas"
-                className="flex items-center justify-center gap-2 border border-border rounded-lg px-3 py-2.5 font-heading font-medium uppercase tracking-wide text-sm text-sub hover:text-txt hover:border-borderStrong active:scale-95 transition-all"
+                className="flex items-center justify-center border border-border rounded-lg px-3 py-2.5 text-sub hover:text-txt hover:border-borderStrong active:scale-95 transition-all"
               >
                 <BookmarkPlus className="w-4 h-4 text-volt" />
               </button>
@@ -205,6 +214,40 @@ export default function Templates() {
             {saving ? "Guardando..." : "Crear plantilla"}
           </PrimaryButton>
         </div>
+      </Modal>
+
+      <Modal open={!!preview} onClose={() => setPreview(null)} title={preview?.name || "Vista previa"} testid="preview-modal">
+        {preview && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sub font-sans text-sm">{preview.description}</p>
+            <div className="flex items-center gap-4 text-xs font-sans text-muted">
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {preview.estimatedMinutes} min</span>
+              <span>{preview.exercises.length} ejercicios</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {preview.exercises.map((e, i) => {
+                const gc = groupColor(e.muscleGroup);
+                return (
+                  <div key={i} className="flex items-center gap-3 bg-bg border border-border rounded-lg p-3" data-testid={`preview-ex-${i}`}>
+                    <span className="w-1 h-9 rounded-full shrink-0" style={{ backgroundColor: gc }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans font-bold text-txt truncate">{e.exerciseName}</p>
+                      <p className="text-xs font-sans" style={{ color: gc }}>{e.muscleGroup}</p>
+                    </div>
+                    <span className="font-heading text-lg text-volt shrink-0">{e.defaultSets} × {e.defaultReps}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <PrimaryButton
+              onClick={() => (isAuthenticated ? navigate(`/sesion/nueva?preset=${preview.id}`) : navigate("/cuenta"))}
+              className="w-full"
+              data-testid="preview-start-btn"
+            >
+              <Play className="w-4 h-4" /> Empezar este entreno
+            </PrimaryButton>
+          </div>
+        )}
       </Modal>
     </div>
   );
