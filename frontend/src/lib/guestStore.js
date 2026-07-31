@@ -120,4 +120,8 @@ export const guest = {
   listPRs() {
     return read(PR_KEY).sort((a, b) => new Date(b.achievedAt) - new Date(a.achievedAt));
   },
+  clear() {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(PR_KEY);
+  },
 };

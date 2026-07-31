@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { api, getToken, setToken, apiError } from "../lib/api";
+import { guest } from "../lib/guestStore";
 
 const AuthContext = createContext(null);
 
@@ -33,10 +35,23 @@ export function AuthProvider({ children }) {
     loadMe();
   }, [loadMe]);
 
+  const importGuestData = async () => {
+    const sessions = guest.listSessions();
+    if (!sessions.length) return;
+    try {
+      const { data } = await api.post("/sessions/import", { sessions });
+      guest.clear();
+      if (data?.imported) toast.success(`${data.imported} entreno${data.imported > 1 ? "s" : ""} importado${data.imported > 1 ? "s" : ""} a tu cuenta`);
+    } catch {
+      // keep local data if import fails
+    }
+  };
+
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
     setToken(data.token);
     setUser(data.user);
+    await importGuestData();
     return data.user;
   };
 
@@ -44,6 +59,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post("/auth/register", { email, password, name });
     setToken(data.token);
     setUser(data.user);
+    await importGuestData();
     return data.user;
   };
 
@@ -51,6 +67,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post("/auth/google/session", { session_id: sessionId });
     setToken(data.token);
     setUser(data.user);
+    await importGuestData();
     return data.user;
   };
 

@@ -172,6 +172,33 @@ class UserExerciseCreate(BaseModel):
     description: Optional[str] = ""
 
 
+class ImportSet(BaseModel):
+    weight: float = 0
+    reps: int = 0
+    isWarmup: bool = False
+
+
+class ImportExercise(BaseModel):
+    exerciseId: str
+    exerciseName: str
+    muscleGroup: str
+    sets: List[ImportSet] = []
+
+
+class ImportSession(BaseModel):
+    name: str
+    workoutType: Optional[str] = "otro"
+    startedAt: Optional[str] = None
+    durationMinutes: int = 0
+    notes: str = ""
+    totalVolume: Optional[float] = 0
+    exercises: List[ImportExercise] = []
+
+
+class ImportReq(BaseModel):
+    sessions: List[ImportSession] = []
+
+
 # ---------- rate limiting ----------
 LOCKOUT_THRESHOLD = 5
 LOCKOUT_MINUTES = 15
@@ -483,6 +510,70 @@ async def quick_log(body: QuickLogReq, user: dict = Depends(get_current_user)):
     await db.sessions.insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+
+@api.post("/sessions/import")
+async def import_sessions(body: ImportReq, user: dict = Depends(get_current_user)):
+    uid = user["user_id"]
+    imported = 0
+    sessions = sorted(body.sessions, key=lambda s: s.startedAt or "")
+    for iss in sessions:
+        sid = f"ses_{uuid.uuid4().hex[:12]}"
+        started = iss.startedAt or now_iso()
+        total_volume = 0.0
+        ex_docs = []
+        for i, ex in enumerate(iss.exercises):
+            weights = [s.weight for s in ex.sets]
+            max_w = max(weights) if weights else 0
+            prev = await db.personal_records.find_one(
+                {"user_id": uid, "exerciseId": ex.exerciseId, "prType": "weight"},
+                sort=[("prValue", -1)],
+            )
+            prev_best = prev["prValue"] if prev else 0
+            is_pr_ex = max_w > prev_best and max_w > 0
+            marked = False
+            if is_pr_ex:
+                await db.personal_records.insert_one({
+                    "id": f"pr_{uuid.uuid4().hex[:12]}",
+                    "user_id": uid,
+                    "exerciseId": ex.exerciseId,
+                    "exerciseName": ex.exerciseName,
+                    "prType": "weight",
+                    "prValue": max_w,
+                    "sessionId": sid,
+                    "achievedAt": started,
+                })
+            set_docs = []
+            for j, s in enumerate(ex.sets):
+                is_pr = False
+                if is_pr_ex and not marked and s.weight == max_w:
+                    is_pr = True
+                    marked = True
+                set_docs.append({"setNumber": j + 1, "weight": s.weight, "reps": s.reps, "isPr": is_pr, "isWarmup": s.isWarmup})
+                total_volume += s.weight * s.reps
+            ex_docs.append({
+                "exerciseId": ex.exerciseId,
+                "exerciseName": ex.exerciseName,
+                "muscleGroup": ex.muscleGroup,
+                "sortOrder": i,
+                "sets": set_docs,
+            })
+        doc = {
+            "id": sid,
+            "user_id": uid,
+            "templateId": None,
+            "name": iss.name,
+            "workoutType": iss.workoutType or "otro",
+            "startedAt": started,
+            "completedAt": now_iso(),
+            "totalVolume": total_volume if ex_docs else (iss.totalVolume or 0),
+            "durationMinutes": iss.durationMinutes or 10,
+            "notes": iss.notes or "",
+            "exercises": ex_docs,
+        }
+        await db.sessions.insert_one(doc)
+        imported += 1
+    return {"imported": imported}
 
 
 @api.put("/sessions/{sid}")
