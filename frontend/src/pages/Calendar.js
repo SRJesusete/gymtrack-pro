@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
-import { api, apiError } from "../lib/api";
+import { apiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { listSessions, quickLog, updateSession, deleteSession } from "../lib/sessionData";
 import { WORKOUT_TYPES, getTypeColor, getTypeLabel } from "../constants/workoutTypes";
 import { Card, Overline, Loading, Chip, PrimaryButton, StatCard } from "../components/ui";
 import { GuestBanner } from "../components/GuestBanner";
@@ -31,8 +32,7 @@ export default function Calendar() {
   const [saving, setSaving] = useState(false);
 
   const load = () => {
-    if (!isAuthenticated) { setSessions([]); setLoading(false); return; }
-    api.get("/sessions").then(({ data }) => setSessions(data)).finally(() => setLoading(false));
+    listSessions(isAuthenticated).then((data) => setSessions(data)).finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, [isAuthenticated]);
 
@@ -81,7 +81,6 @@ export default function Calendar() {
   }), [periodSessions]);
 
   const openAdd = (date) => {
-    if (!isAuthenticated) { navigate("/cuenta"); return; }
     setEditing(null);
     setForm({ name: "", durationMinutes: "", notes: "", date: ymd(date || new Date()), workoutType: "fuerza", totalVolume: "" });
     setOpen(true);
@@ -105,8 +104,8 @@ export default function Calendar() {
       totalVolume: parseFloat(form.totalVolume) || 0,
     };
     try {
-      if (editing) await api.put(`/sessions/${editing.id}`, payload);
-      else await api.post("/sessions/quick", payload);
+      if (editing) await updateSession(isAuthenticated, editing.id, payload);
+      else await quickLog(isAuthenticated, payload);
       toast.success(editing ? "Entreno actualizado" : "Entreno guardado");
       setOpen(false);
       load();
@@ -115,7 +114,7 @@ export default function Calendar() {
 
   const del = async () => {
     if (!editing) return;
-    await api.delete(`/sessions/${editing.id}`);
+    await deleteSession(isAuthenticated, editing.id);
     toast.success("Entreno eliminado");
     setOpen(false);
     load();
@@ -143,7 +142,7 @@ export default function Calendar() {
         </PrimaryButton>
       </div>
 
-      {!isAuthenticated && <GuestBanner text="Estás viendo el calendario como invitado. Inicia sesión para guardar tus entrenos." />}
+      {!isAuthenticated && <GuestBanner text="Modo invitado: tus entrenos se guardan en este dispositivo. Inicia sesión para sincronizarlos en la nube." />}
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex gap-2">

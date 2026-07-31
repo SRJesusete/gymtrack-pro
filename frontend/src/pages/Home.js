@@ -4,7 +4,7 @@ import { ChevronDown, Clock, Dumbbell, Plus, Sprout, Flame, Trophy, ArrowRight }
 import { LEVELS, getPresetsByLevel } from "../constants/workoutPresets";
 import { groupColor } from "../constants/muscleGroups";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../lib/api";
+import { listSessions } from "../lib/sessionData";
 import { Card, Overline, StatCard } from "../components/ui";
 import { cn, fmtNum, formatDate } from "../lib/utils";
 
@@ -18,8 +18,7 @@ export default function Home() {
   const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    api.get("/sessions").then(({ data }) => setSessions(data)).catch(() => {});
+    listSessions(isAuthenticated).then((data) => setSessions(data)).catch(() => {});
   }, [isAuthenticated]);
 
   const stats = useMemo(() => {
@@ -61,7 +60,7 @@ export default function Home() {
       </Card>
 
       {/* Stats */}
-      {isAuthenticated && (
+      {sessions.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-8">
           <StatCard value={fmtNum(stats.total)} label="Entrenos" testid="home-stat-total" />
           <StatCard value={fmtNum(stats.volume)} label="Kg totales" testid="home-stat-volume" />

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Award, TrendingUp } from "lucide-react";
-import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { listSessions, listPRs } from "../lib/sessionData";
 import { Card, Overline, Loading, StatCard } from "../components/ui";
 import { GuestBanner } from "../components/GuestBanner";
 import { TypeDistribution } from "../components/TypeDistribution";
@@ -24,11 +24,9 @@ export default function Progress() {
   const [selectedType, setSelectedType] = useState(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { setSessions([]); setPrs([]); setLoading(false); return; }
-    Promise.all([
-      api.get("/sessions").then((r) => r.data),
-      api.get("/personal-records").then((r) => r.data),
-    ]).then(([s, p]) => { setSessions(s); setPrs(p); }).finally(() => setLoading(false));
+    Promise.all([listSessions(isAuthenticated), listPRs(isAuthenticated)])
+      .then(([s, p]) => { setSessions(s); setPrs(p); })
+      .finally(() => setLoading(false));
   }, [isAuthenticated]);
 
   const ranged = useMemo(() => {
@@ -66,7 +64,7 @@ export default function Progress() {
       <Overline>Estadísticas</Overline>
       <h1 className="font-heading font-bold uppercase text-4xl sm:text-5xl tracking-tight leading-none mt-2 mb-6">Progreso</h1>
 
-      {!isAuthenticated && <GuestBanner text="Inicia sesión para ver tu progreso, volumen y récords personales." />}
+      {!isAuthenticated && <GuestBanner text="Modo invitado: tu progreso se calcula con los entrenos de este dispositivo. Inicia sesión para sincronizarlo." />}
 
       <div className="flex gap-2 mb-6">
         {RANGES.map((r) => (

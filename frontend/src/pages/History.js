@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dumbbell, ArrowRight, Clock, Flame } from "lucide-react";
-import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { listSessions } from "../lib/sessionData";
 import { getTypeColor, getTypeLabel } from "../constants/workoutTypes";
 import { Card, Overline, Loading } from "../components/ui";
 import { GuestBanner } from "../components/GuestBanner";
@@ -15,8 +15,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) { setSessions([]); setLoading(false); return; }
-    api.get("/sessions").then(({ data }) => setSessions(data)).finally(() => setLoading(false));
+    listSessions(isAuthenticated).then((data) => setSessions(data)).finally(() => setLoading(false));
   }, [isAuthenticated]);
 
   const grouped = useMemo(() => {
@@ -35,7 +34,7 @@ export default function History() {
       <Overline>Registro</Overline>
       <h1 className="font-heading font-bold uppercase text-4xl sm:text-5xl tracking-tight leading-none mt-2 mb-8">Historial</h1>
 
-      {!isAuthenticated && <GuestBanner text="Inicia sesión para registrar entrenos y ver tu historial." />}
+      {!isAuthenticated && <GuestBanner text="Modo invitado: tu historial se guarda en este dispositivo. Inicia sesión para sincronizarlo." />}
 
       {sessions.length === 0 ? (
         <div className="py-16 flex flex-col items-center gap-3 text-center">

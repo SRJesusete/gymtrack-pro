@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft, Trash2, Award } from "lucide-react";
-import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+import { getSession, deleteSession } from "../lib/sessionData";
 import { getTypeColor, getTypeLabel } from "../constants/workoutTypes";
 import { groupColor } from "../constants/muscleGroups";
 import { Card, Overline, Loading, StatCard } from "../components/ui";
@@ -11,15 +12,19 @@ import { formatDate, fmtNum } from "../lib/utils";
 export default function SessionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get(`/sessions/${id}`).then(({ data }) => setSession(data)).catch(() => setSession(null)).finally(() => setLoading(false));
-  }, [id]);
+    Promise.resolve(getSession(isAuthenticated, id))
+      .then((data) => setSession(data))
+      .catch(() => setSession(null))
+      .finally(() => setLoading(false));
+  }, [id, isAuthenticated]);
 
   const del = async () => {
-    await api.delete(`/sessions/${id}`);
+    await deleteSession(isAuthenticated, id);
     toast.success("Entreno eliminado");
     navigate("/historial");
   };

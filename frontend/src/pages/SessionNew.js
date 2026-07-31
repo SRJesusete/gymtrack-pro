@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Trash2, X, ChevronLeft } from "lucide-react";
 import { api, apiError } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+import { createFullSession } from "../lib/sessionData";
 import { getPresetById } from "../constants/workoutPresets";
 import { groupColor, MUSCLE_GROUPS } from "../constants/muscleGroups";
 import { WORKOUT_TYPES } from "../constants/workoutTypes";
@@ -11,6 +13,7 @@ import { Modal } from "../components/Modal";
 
 export default function SessionNew() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [params] = useSearchParams();
   const [name, setName] = useState("Entreno");
   const [workoutType, setWorkoutType] = useState("fuerza");
@@ -37,6 +40,7 @@ export default function SessionNew() {
         })));
       }
     } else if (templateId) {
+      if (!isAuthenticated) return;
       api.get(`/templates/${templateId}`).then(({ data }) => {
         setName(data.name);
         setExs((data.exercises || []).map((e) => ({
@@ -79,9 +83,9 @@ export default function SessionNew() {
       })),
     };
     try {
-      const { data } = await api.post("/sessions", payload);
+      const data = await createFullSession(isAuthenticated, payload);
       if (data.newPrs?.length) toast.success(`¡Nuevo récord! ${data.newPrs.join(", ")}`);
-      else toast.success("Entreno guardado");
+      else toast.success(isAuthenticated ? "Entreno guardado" : "Entreno guardado en este dispositivo");
       navigate(`/sesion/${data.id}`);
     } catch (e) { toast.error(apiError(e)); } finally { setSaving(false); }
   };
