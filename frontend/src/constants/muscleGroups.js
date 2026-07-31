@@ -13,22 +13,61 @@ export function groupColor(key) {
 
 export const YT_RED = "#FF3B30";
 
+const T = (search, tips, errors) => ({ search, tips, errors });
+
 export const VIDEO_TIPS = {
-  "Press Banca": { search: "press banca tecnica correcta gym", tips: ["Pies firmes en el suelo", "Retrae las escápulas", "Arco lumbar ligero", "Baja la barra al pecho controladamente"], errors: ["Rebotar la barra en el pecho", "Levantar los pies", "Hombros desprotegidos"] },
-  "Press Banca Inclinado": { search: "press banca inclinado tecnica", tips: ["Banco a 30-45°", "Codos a 45° del torso", "Control en la bajada"], errors: ["Angulo demasiado alto (>60°)", "Abrir demasiado los codos"] },
-  "Aperturas con Mancuernas": { search: "aperturas con mancuernas pecho tecnica", tips: ["Ligera flexion de codos", "Abrir hasta sentir estiramiento", "Contraer pectoral al cerrar"], errors: ["Bajar demasiado las mancuernas", "Estirar los brazos completamente"] },
-  "Cruce de Poleas": { search: "cruce de poleas pecho tecnica", tips: ["Poleas altas", "Ligera inclinacion hacia delante", "Cruzar las manos al final"], errors: ["Usar demasiado peso", "Movimiento brusco"] },
-  Sentadilla: { search: "sentadilla con barra tecnica correcta", tips: ["Barra sobre los trapecios", "Espalda recta, pecho arriba", "Bajar hasta paralelo o mas", "Rodillas alineadas con pies"], errors: ["Talones despegan del suelo", "Rodillas se colapsan hacia dentro", "Espalda se redondea"] },
-  "Prensa de Piernas": { search: "prensa piernas tecnica gym", tips: ["Espalda pegada al respaldo", "90° de flexion de rodilla", "No bloquear rodillas al extender"], errors: ["Bajar demasiado (gluteos se levantan)", "Extender completamente las piernas"] },
-  "Peso Muerto": { search: "peso muerto tecnica correcta principiantes", tips: ["Barra sobre medio pie", "Espalda neutra siempre", "Activar dorsales antes de tirar", "Cadera y hombros suben juntos"], errors: ["Espalda redondeada", "Barra se aleja del cuerpo", "Tiron brusco inicial"] },
-  Dominadas: { search: "dominadas tecnica correcta espalda", tips: ["Agarre prono (palmas hacia fuera)", "Activar escapulas al inicio", "Subir hasta barbilla sobre barra"], errors: ["Balanceo del cuerpo", "No completar el rango", "Hombros encogidos"] },
-  "Remo con Barra": { search: "remo con barra tecnica espalda", tips: ["Torso a 45°", "Barra hacia el ombligo", "Codos pegados al cuerpo"], errors: ["Torso demasiado erguido", "Usar impulso de piernas"] },
-  "Jalón al Pecho": { search: "jalon al pecho tecnica dorsal", tips: ["Agarre ancho", "Pecho arriba", "Llevar barra a la clavicula", "Control en la subida"], errors: ["Balanceo hacia atras", "Tirar con los biceps"] },
-  "Press Militar": { search: "press militar con barra tecnica hombros", tips: ["Barra desde las claviculas", "Core activado", "Empujar vertical, cabeza adelante"], errors: ["Arquear la espalda", "Empujar hacia delante"] },
-  "Elevaciones Laterales": { search: "elevaciones laterales mancuernas tecnica", tips: ["Ligera flexion de codos", "Subir hasta altura de hombros", "Control en la bajada", "No usar impulso"], errors: ["Subir demasiado las mancuernas", "Balancear el cuerpo", "Encoger los hombros"] },
-  "Curl de Bíceps": { search: "curl de biceps con barra tecnica", tips: ["Codos pegados al cuerpo", "Solo mover el antebrazo", "Apretar biceps arriba", "Bajar controladamente"], errors: ["Balancear el cuerpo", "Mover los hombros", "No extender completamente"] },
-  "Press Francés": { search: "press frances triceps tecnica", tips: ["Codos fijos apuntando al techo", "Bajar la barra controladamente", "Extender completamente"], errors: ["Abrir los codos", "Bajar demasiado rapido"] },
-  "Plancha Abdominal": { search: "plancha abdominal tecnica correcta", tips: ["Codos bajo los hombros", "Cuerpo en linea recta", "Gluteos y abdomen contraidos", "Mirada al suelo"], errors: ["Cadera hundida", "Cadera demasiado alta", "Aguantar la respiracion"] },
+  // ---- Pecho ----
+  "Press Banca": T("press banca tecnica correcta gym", ["Pies firmes en el suelo", "Retrae las escápulas", "Arco lumbar ligero", "Baja la barra al pecho controladamente"], ["Rebotar la barra en el pecho", "Levantar los pies", "Hombros desprotegidos"]),
+  "Press Banca Inclinado": T("press banca inclinado tecnica", ["Banco a 30-45°", "Codos a 45° del torso", "Control en la bajada"], ["Ángulo demasiado alto (>60°)", "Abrir demasiado los codos"]),
+  "Press Banca Declinado": T("press banca declinado tecnica", ["Banco declinado 15-30°", "Baja la barra a la parte baja del pecho", "Codos algo recogidos"], ["Bajar la barra muy alta", "Perder el control por el declive"]),
+  "Aperturas con Mancuernas": T("aperturas con mancuernas pecho tecnica", ["Ligera flexión de codos fija", "Abrir hasta sentir estiramiento", "Contraer el pectoral al cerrar"], ["Bajar demasiado las mancuernas", "Estirar los brazos por completo"]),
+  "Cruce de Poleas": T("cruce de poleas pecho tecnica", ["Poleas altas", "Ligera inclinación hacia delante", "Cruzar las manos al final"], ["Usar demasiado peso", "Movimiento brusco"]),
+  "Peck Deck": T("peck deck contractora pecho tecnica", ["Espalda pegada al respaldo", "Codos a la altura de los hombros", "Aprieta el pecho 1s"], ["Usar solo los brazos", "Rango incompleto"]),
+  Flexiones: T("flexiones tecnica correcta", ["Cuerpo en línea recta", "Manos bajo los hombros", "Baja hasta casi tocar el suelo"], ["Cadera hundida o elevada", "Codos totalmente abiertos"]),
+  // ---- Espalda ----
+  Dominadas: T("dominadas tecnica correcta espalda", ["Agarre prono a la anchura de hombros", "Activa las escápulas al inicio", "Sube hasta pasar la barbilla"], ["Balanceo del cuerpo", "No completar el rango", "Tirar solo con bíceps"]),
+  "Jalón al Pecho": T("jalon al pecho tecnica dorsal", ["Agarre ancho", "Pecho arriba", "Lleva la barra a la clavícula", "Control en la subida"], ["Balanceo hacia atrás", "Tirar con los bíceps"]),
+  "Remo con Barra": T("remo con barra tecnica espalda", ["Torso a 45°", "Barra hacia el ombligo", "Codos pegados al cuerpo"], ["Torso demasiado erguido", "Usar impulso de piernas"]),
+  "Remo con Mancuerna": T("remo con mancuerna tecnica espalda", ["Apoya rodilla y mano en el banco", "Tira del codo hacia la cadera", "Espalda neutra"], ["Rotar el torso", "Tirón con el brazo, no la espalda"]),
+  "Remo T-Bar": T("remo t-bar tecnica espalda", ["Espalda recta, pecho arriba", "Tira hacia el abdomen", "Aprieta escápulas arriba"], ["Redondear la espalda", "Usar demasiado impulso"]),
+  "Peso Muerto": T("peso muerto tecnica correcta principiantes", ["Barra sobre medio pie", "Espalda neutra siempre", "Activa dorsales antes de tirar", "Cadera y hombros suben juntos"], ["Espalda redondeada", "La barra se aleja del cuerpo", "Tirón brusco inicial"]),
+  Pullover: T("pullover con mancuerna tecnica", ["Tumbado, mancuerna sobre el pecho", "Baja por detrás de la cabeza", "Codos ligeramente flexionados"], ["Bajar demasiado (dolor de hombro)", "Extender los codos del todo"]),
+  Encogimientos: T("encogimientos trapecio tecnica", ["Sube los hombros hacia las orejas", "Aprieta 1s arriba", "Sin rotar los hombros"], ["Rotar los hombros", "Usar impulso del cuello"]),
+  // ---- Piernas ----
+  Sentadilla: T("sentadilla con barra tecnica correcta", ["Barra sobre los trapecios", "Espalda recta, pecho arriba", "Baja hasta paralelo o más", "Rodillas alineadas con los pies"], ["Talones se despegan", "Rodillas se colapsan hacia dentro", "Espalda redondeada"]),
+  "Sentadilla Búlgara": T("sentadilla bulgara tecnica", ["Pie trasero sobre el banco", "Baja con la rodilla delantera", "Torso ligeramente inclinado"], ["Paso demasiado corto", "Rodilla sobrepasa mucho el pie"]),
+  "Sentadilla Isométrica": T("sentadilla isometrica pared tecnica", ["Espalda apoyada en la pared", "Muslos paralelos al suelo", "Mantén la posición el tiempo objetivo"], ["Rodillas hacia dentro", "Apoyar las manos en los muslos"]),
+  "Prensa de Piernas": T("prensa piernas tecnica gym", ["Espalda pegada al respaldo", "90° de flexión de rodilla", "No bloquees las rodillas al extender"], ["Bajar demasiado (glúteos se levantan)", "Extender del todo con tirón"]),
+  Zancadas: T("zancadas tecnica correcta piernas", ["Paso largo y estable", "Baja la rodilla trasera al suelo", "Torso erguido"], ["Rodilla delantera pasa mucho el pie", "Perder el equilibrio"]),
+  "Extension de Cuadriceps": T("extension de cuadriceps tecnica", ["Ajusta el rodillo al tobillo", "Extiende sin bloquear de golpe", "Baja controlado"], ["Usar impulso", "Rango incompleto"]),
+  "Curl Femoral": T("curl femoral maquina tecnica", ["Rodillo sobre el tendón de Aquiles", "Flexiona llevando el talón al glúteo", "Baja controlado"], ["Levantar la cadera", "Usar demasiado peso"]),
+  "Gemelos en Prensa": T("gemelos en prensa tecnica", ["Empuja con la punta del pie", "Estira abajo, contrae arriba", "Rango completo"], ["Rebotar", "Rango corto"]),
+  "Hip Thrust": T("hip thrust tecnica gluteo", ["Espalda alta apoyada en el banco", "Empuja con los talones", "Aprieta glúteos arriba, tibia vertical"], ["Hiperextender la lumbar", "No llegar a la extensión completa"]),
+  "Puente de Glúteos": T("puente de gluteos tecnica", ["Tumbado, pies apoyados", "Sube la cadera apretando glúteos", "Cuerpo recto arriba"], ["Arquear la lumbar", "Empujar con la punta de los pies"]),
+  // ---- Hombros ----
+  "Press Militar": T("press militar con barra tecnica hombros", ["Barra desde las clavículas", "Core activado", "Empuja vertical, cabeza adelante al final"], ["Arquear la espalda", "Empujar hacia delante"]),
+  "Press Arnold": T("press arnold tecnica hombros", ["Empieza con palmas hacia ti", "Gira mientras subes", "Control en toda la fase"], ["Usar demasiado peso", "Rotación brusca"]),
+  "Elevaciones Laterales": T("elevaciones laterales mancuernas tecnica", ["Ligera flexión de codos", "Sube hasta la altura de los hombros", "Baja controlado, sin impulso"], ["Subir demasiado", "Balancear el cuerpo", "Encoger los hombros"]),
+  "Elevaciones Frontales": T("elevaciones frontales tecnica hombros", ["Sube al frente hasta la altura del hombro", "Codos casi rectos", "Sin balanceo"], ["Usar impulso de cadera", "Subir por encima del hombro"]),
+  "Elevación Lateral en Polea": T("elevacion lateral en polea tecnica", ["Polea baja detrás del cuerpo", "Eleva lateral controlado", "Aprieta el deltoides arriba"], ["Usar el trapecio", "Movimiento con tirón"]),
+  "Pajaro con Mancuernas": T("pajaro deltoides posterior tecnica", ["Torso inclinado adelante", "Abre los brazos a los lados", "Aprieta escápulas"], ["Levantar el torso", "Usar impulso"]),
+  "Face Pull": T("face pull tecnica hombros", ["Cuerda a la altura de la cara", "Tira separando las manos", "Codos altos"], ["Peso excesivo", "Bajar los codos"]),
+  "Remo al Cuello": T("remo al cuello tecnica hombros", ["Sube la barra hacia la barbilla", "Codos por encima de las muñecas", "Agarre a la anchura de hombros"], ["Agarre demasiado cerrado", "Subir con muñecas dobladas"]),
+  // ---- Brazos ----
+  "Curl de Bíceps": T("curl de biceps con barra tecnica", ["Codos pegados al cuerpo", "Solo mueve el antebrazo", "Aprieta el bíceps arriba", "Baja controlado"], ["Balancear el cuerpo", "Mover los hombros", "No extender del todo"]),
+  "Curl Concentrado": T("curl concentrado biceps tecnica", ["Codo apoyado en el muslo", "Sube controlado", "Contrae fuerte arriba"], ["Usar impulso", "Despegar el codo del muslo"]),
+  Martillo: T("curl martillo biceps tecnica", ["Agarre neutro (palmas enfrentadas)", "Codos fijos", "Sube y baja controlado"], ["Balanceo", "Rango incompleto"]),
+  "Press Francés": T("press frances triceps tecnica", ["Codos fijos apuntando al techo", "Baja la barra controladamente", "Extiende por completo"], ["Abrir los codos", "Bajar demasiado rápido"]),
+  "Press Francés Acostado": T("press frances acostado triceps tecnica", ["Tumbado, codos apuntando arriba", "Baja hacia la frente", "Extiende sin bloquear de golpe"], ["Mover los codos", "Perder el control en la bajada"]),
+  "Extensión de Tríceps en Polea": T("extension triceps polea tecnica", ["Codos pegados al cuerpo", "Extiende hasta abajo", "Aprieta el tríceps"], ["Mover los codos", "Ayudarse con el cuerpo"]),
+  Fondos: T("fondos triceps tecnica", ["Cuerpo lo más vertical posible", "Baja hasta 90° de codo", "Sube extendiendo el tríceps"], ["Bajar demasiado (hombro)", "Balancear las piernas"]),
+  // ---- Core ----
+  "Plancha Abdominal": T("plancha abdominal tecnica correcta", ["Codos bajo los hombros", "Cuerpo en línea recta", "Glúteos y abdomen contraídos", "Mirada al suelo"], ["Cadera hundida", "Cadera demasiado alta", "Aguantar la respiración"]),
+  "Crunch Abdominal": T("crunch abdominal tecnica", ["Sube con el abdomen, no el cuello", "Barbilla separada del pecho", "Baja controlado"], ["Tirar de la cabeza", "Usar impulso"]),
+  "Elevación de Piernas": T("elevacion de piernas abdominal tecnica", ["Lumbar pegada al suelo", "Sube las piernas controladas", "Baja sin tocar el suelo"], ["Arquear la lumbar", "Usar impulso"]),
+  "Elevación en Barra": T("elevacion de piernas en barra tecnica", ["Cuélgate sin balanceo", "Sube las rodillas/piernas al pecho", "Baja controlado"], ["Balancearse", "Usar impulso para subir"]),
+  "Giro Ruso": T("giro ruso russian twist tecnica", ["Torso inclinado atrás", "Gira de lado a lado con control", "Abdomen apretado"], ["Girar solo los brazos", "Redondear la espalda"]),
+  "Rueda Abdominal": T("rueda abdominal ab wheel tecnica", ["Abdomen y glúteos apretados", "Rueda hacia delante sin arquear", "Vuelve controlado"], ["Arquear la lumbar", "Extender más de lo que controlas"]),
 };
 
 export function getVideoInfo(name) {
