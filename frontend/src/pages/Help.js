@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Search, Dumbbell, ChevronDown, PlayCircle } from "lucide-react";
-import { MUSCLE_GROUPS, groupColor, getVideoInfo, searchYouTube, YT_RED } from "../constants/muscleGroups";
+import { Search, Dumbbell, ChevronDown, PlayCircle, ExternalLink } from "lucide-react";
+import { MUSCLE_GROUPS, groupColor, getVideoInfo, getVideoId, searchYouTube, YT_RED } from "../constants/muscleGroups";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { Card, Overline, Chip, Loading, StatCard } from "../components/ui";
+import { Modal } from "../components/Modal";
 import { cn } from "../lib/utils";
 
 export default function Help() {
@@ -13,6 +14,9 @@ export default function Help() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
+  const [videoEx, setVideoEx] = useState(null);
+
+  const openVideo = (ex) => setVideoEx(ex);
 
   useEffect(() => {
     Promise.all([
@@ -106,7 +110,7 @@ export default function Help() {
                           {ex.description && <p className="text-sub text-sm font-sans mt-0.5">{ex.description}</p>}
                         </div>
                         <button
-                          onClick={() => window.open(searchYouTube(info.search), "_blank")}
+                          onClick={() => openVideo(ex)}
                           data-testid={`help-video-${ex.id}`}
                           className="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surfaceHover transition-colors"
                         >
@@ -148,12 +152,12 @@ export default function Help() {
                             </div>
                           )}
                           <button
-                            onClick={() => window.open(searchYouTube(info.search), "_blank")}
+                            onClick={() => openVideo(ex)}
                             data-testid={`help-youtube-${ex.id}`}
                             className="w-full flex items-center justify-center gap-2 rounded-full py-2.5 font-sans font-extrabold text-white active:scale-95 transition-transform"
                             style={{ backgroundColor: YT_RED }}
                           >
-                            <PlayCircle className="w-4 h-4" /> Ver vídeo en YouTube
+                            <PlayCircle className="w-4 h-4" /> Ver vídeo
                           </button>
                         </div>
                       )}
@@ -172,6 +176,59 @@ export default function Help() {
           <p className="text-muted font-sans">{query ? `Sin resultados para "${query}"` : "No hay ejercicios en este grupo"}</p>
         </div>
       )}
+
+      <Modal open={!!videoEx} onClose={() => setVideoEx(null)} title={videoEx?.name || "Vídeo"} testid="help-video-modal">
+        {videoEx && (() => {
+          const vid = getVideoId(videoEx.name);
+          const info = getVideoInfo(videoEx.name);
+          return (
+            <div className="flex flex-col gap-4">
+              {vid ? (
+                <button
+                  onClick={() => window.open(`https://www.youtube.com/watch?v=${vid}`, "_blank")}
+                  data-testid="help-video-play"
+                  className="group relative w-full rounded-xl overflow-hidden bg-black block"
+                  style={{ aspectRatio: "16/9" }}
+                >
+                  <img
+                    src={`https://img.youtube.com/vi/${vid}/hqdefault.jpg`}
+                    alt={videoEx.name}
+                    className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <span className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: YT_RED }}>
+                      <PlayCircle className="w-9 h-9 text-white" />
+                    </span>
+                  </span>
+                  <span className="absolute bottom-2 right-2 text-[10px] font-sans font-bold text-white/90 bg-black/60 px-2 py-0.5 rounded">YouTube</span>
+                </button>
+              ) : (
+                <div className="rounded-xl border border-border bg-bg p-6 flex flex-col items-center gap-3 text-center">
+                  <PlayCircle className="w-10 h-10" style={{ color: YT_RED }} />
+                  <p className="text-sub font-sans text-sm">Abre el mejor vídeo de técnica de <span className="text-txt font-bold">{videoEx.name}</span> en YouTube.</p>
+                  <button
+                    onClick={() => window.open(searchYouTube(info.search), "_blank")}
+                    data-testid="help-video-modal-search"
+                    className="flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-sans font-extrabold text-white active:scale-95 transition-transform"
+                    style={{ backgroundColor: YT_RED }}
+                  >
+                    <PlayCircle className="w-4 h-4" /> Ver en YouTube
+                  </button>
+                </div>
+              )}
+              <a
+                href={vid ? `https://www.youtube.com/watch?v=${vid}` : searchYouTube(info.search)}
+                target="_blank"
+                rel="noreferrer"
+                data-testid="help-video-modal-external"
+                className="flex items-center justify-center gap-1.5 text-sub hover:text-txt text-xs font-sans transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Abrir en YouTube
+              </a>
+            </div>
+          );
+        })()}
+      </Modal>
     </div>
   );
 }

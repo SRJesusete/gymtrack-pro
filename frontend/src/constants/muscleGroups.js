@@ -13,6 +13,35 @@ export function groupColor(key) {
 
 export const YT_RED = "#FF3B30";
 
+// Verified YouTube video IDs (Spanish technique tutorials) per exercise.
+export const VIDEO_IDS = {
+  "Press Banca": "VgEkiylX3Qo",
+  "Press Banca Inclinado": "swMjJqFzxCQ",
+  "Press Banca Declinado": "L1U8yy4OqbQ",
+  "Aperturas con Mancuernas": "kgt1Ik1yXpk",
+  "Peso Muerto": "59KftU68hHQ",
+  Dominadas: "XDIGtArAenQ",
+  Sentadilla: "zWhrzLouoQ0",
+  "Prensa de Piernas": "hl-EJUQ2yuc",
+  Zancadas: "SXHpc19u9MQ",
+  "Sentadilla Búlgara": "IdilLr9nyuQ",
+  "Press Militar": "j_Buh54Sb-w",
+  "Elevaciones Laterales": "V3LaKO8iZUE",
+  "Press Arnold": "JdMgGoAPKjg",
+  "Face Pull": "Q18p2QtQAes",
+  "Curl de Bíceps": "zNZ5RmhGqjc",
+  "Plancha Abdominal": "AD1YG9b88bk",
+  "Crunch Abdominal": "yhHsPYtzYuU",
+};
+
+export function getVideoId(name) {
+  if (VIDEO_IDS[name]) return VIDEO_IDS[name];
+  for (const [key, id] of Object.entries(VIDEO_IDS)) {
+    if (name.toLowerCase().includes(key.toLowerCase())) return id;
+  }
+  return null;
+}
+
 const T = (search, tips, errors) => ({ search, tips, errors });
 
 export const VIDEO_TIPS = {
