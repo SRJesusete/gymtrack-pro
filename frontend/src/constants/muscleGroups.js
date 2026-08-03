@@ -15,29 +15,63 @@ export const YT_RED = "#FF3B30";
 
 // Verified YouTube video IDs (Spanish technique tutorials) per exercise.
 export const VIDEO_IDS = {
+  // Pecho
   "Press Banca": "VgEkiylX3Qo",
   "Press Banca Inclinado": "swMjJqFzxCQ",
   "Press Banca Declinado": "L1U8yy4OqbQ",
   "Aperturas con Mancuernas": "kgt1Ik1yXpk",
+  "Cruce de Poleas": "TmYsga_aOfo",
+  Flexiones: "InGwq6APE40",
+  // Espalda
   "Peso Muerto": "59KftU68hHQ",
   Dominadas: "XDIGtArAenQ",
+  "Jalón al Pecho": "fVU5ODcbmik",
+  "Remo con Barra": "j7h2ytbt5nc",
+  "Remo con Mancuerna": "ryhxLQUn-cQ",
+  "Remo T-Bar": "VsiEATZdNQw",
+  // Piernas
   Sentadilla: "zWhrzLouoQ0",
+  "Sentadilla Búlgara": "IdilLr9nyuQ",
+  "Sentadilla Isométrica": "sgGXhqKJjcQ",
   "Prensa de Piernas": "hl-EJUQ2yuc",
   Zancadas: "SXHpc19u9MQ",
-  "Sentadilla Búlgara": "IdilLr9nyuQ",
+  "Extensión de Cuádriceps": "ndnA6yvGoqQ",
+  "Curl Femoral": "CBCPBnMzsMI",
+  "Gemelos en Prensa": "L4YnlvVLxtU",
+  "Hip Thrust": "3aTb9Megbuo",
+  "Puente de Glúteos": "ea2tQUJ9lGk",
+  // Hombros
   "Press Militar": "j_Buh54Sb-w",
-  "Elevaciones Laterales": "V3LaKO8iZUE",
   "Press Arnold": "JdMgGoAPKjg",
+  "Elevaciones Laterales": "V3LaKO8iZUE",
+  "Elevaciones Frontales": "O0n4ITO_288",
+  "Elevación Lateral en Polea": "bke5gJKJqh8",
+  "Pájaro con Mancuernas": "RG_41P2hP0s",
   "Face Pull": "Q18p2QtQAes",
+  "Remo al Cuello": "tpCINjIeGng",
+  // Brazos
   "Curl de Bíceps": "zNZ5RmhGqjc",
+  "Curl Concentrado": "EbOn-SVVbaA",
+  Martillo: "RHdacbwKbTo",
+  "Press Francés": "SHL-rkBlK0w",
+  "Press Francés Acostado": "iQLnqT0zpAs",
+  // Core
   "Plancha Abdominal": "AD1YG9b88bk",
   "Crunch Abdominal": "yhHsPYtzYuU",
+  "Elevación de Piernas": "-TFVKtx9tg4",
+  "Elevación en Barra": "n8CC7XJJrFw",
+  "Giro Ruso": "0autvlUL28c",
+  "Rueda Abdominal": "KBAn_7SBDwQ",
 };
+
+const norm = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 export function getVideoId(name) {
   if (VIDEO_IDS[name]) return VIDEO_IDS[name];
+  const n = norm(name);
   for (const [key, id] of Object.entries(VIDEO_IDS)) {
-    if (name.toLowerCase().includes(key.toLowerCase())) return id;
+    const k = norm(key);
+    if (n === k || n.includes(k) || k.includes(n)) return id;
   }
   return null;
 }
@@ -102,8 +136,10 @@ export const VIDEO_TIPS = {
 export function getVideoInfo(name) {
   const exact = VIDEO_TIPS[name];
   if (exact) return exact;
+  const n = norm(name);
   for (const [key, val] of Object.entries(VIDEO_TIPS)) {
-    if (name.toLowerCase().includes(key.toLowerCase())) return val;
+    const k = norm(key);
+    if (n === k || n.includes(k) || k.includes(n)) return val;
   }
   return { search: `${name} ejercicio gym tecnica`, tips: [], errors: [] };
 }
