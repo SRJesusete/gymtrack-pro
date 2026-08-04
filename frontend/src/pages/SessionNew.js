@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Trash2, X, ChevronLeft } from "lucide-react";
+import { Plus, Trash2, X, ChevronLeft, Timer } from "lucide-react";
 import { api, apiError } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { createFullSession } from "../lib/sessionData";
@@ -10,6 +10,9 @@ import { groupColor, MUSCLE_GROUPS } from "../constants/muscleGroups";
 import { WORKOUT_TYPES } from "../constants/workoutTypes";
 import { Card, Loading, PrimaryButton, Chip } from "../components/ui";
 import { Modal } from "../components/Modal";
+import { RestTimer } from "../components/RestTimer";
+
+const REST_OPTIONS = [60, 90, 120, 180];
 
 export default function SessionNew() {
   const navigate = useNavigate();
@@ -22,6 +25,9 @@ export default function SessionNew() {
   const [loading, setLoading] = useState(true);
   const [pickOpen, setPickOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [restDuration, setRestDuration] = useState(90);
+  const restRef = useRef(null);
+  const startRest = (seconds) => restRef.current?.start(seconds);
 
   useEffect(() => {
     api.get("/exercises").then(({ data }) => setLibrary(data)).finally(() => setLoading(false));
@@ -107,6 +113,17 @@ export default function SessionNew() {
         ))}
       </div>
 
+      <div className="flex items-center flex-wrap gap-2 mb-6">
+        <span className="flex items-center gap-1.5 text-xs font-sans font-bold uppercase tracking-wide text-muted mr-1">
+          <Timer className="w-4 h-4 text-volt" /> Descanso
+        </span>
+        {REST_OPTIONS.map((s) => (
+          <Chip key={s} active={restDuration === s} color="#D4FF00" onClick={() => setRestDuration(s)} testid={`rest-option-${s}`}>
+            {s < 60 ? `${s}s` : `${s / 60} min`}
+          </Chip>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-4 mb-6">
         {exs.map((e, i) => {
           const gc = groupColor(e.muscleGroup);
@@ -126,6 +143,7 @@ export default function SessionNew() {
                   <span className="flex-1 text-[10px] font-sans font-bold uppercase text-muted">Kg</span>
                   <span className="flex-1 text-[10px] font-sans font-bold uppercase text-muted">Reps</span>
                   <span className="w-8" />
+                  <span className="w-8" />
                 </div>
                 <div className="flex flex-col gap-2">
                   {e.sets.map((s, j) => (
@@ -135,6 +153,7 @@ export default function SessionNew() {
                         className="flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-txt text-center focus:outline-none focus:border-volt font-sans" />
                       <input type="number" value={s.reps} onChange={(ev) => updateSet(i, j, "reps", ev.target.value)} placeholder="0" data-testid={`session-set-reps-${i}-${j}`}
                         className="flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-txt text-center focus:outline-none focus:border-volt font-sans" />
+                      <button onClick={() => startRest(restDuration)} data-testid={`session-set-rest-${i}-${j}`} title="Iniciar descanso" className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-volt hover:bg-volt/10 transition-colors"><Timer className="w-4 h-4" /></button>
                       <button onClick={() => removeSet(i, j)} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-danger"><X className="w-4 h-4" /></button>
                     </div>
                   ))}
@@ -175,6 +194,8 @@ export default function SessionNew() {
           ))}
         </div>
       </Modal>
+
+      <RestTimer ref={restRef} />
     </div>
   );
 }
