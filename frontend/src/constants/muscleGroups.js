@@ -55,6 +55,12 @@ export const VIDEO_IDS = {
   Martillo: "RHdacbwKbTo",
   "Press Francés": "SHL-rkBlK0w",
   "Press Francés Acostado": "iQLnqT0zpAs",
+  "Extensión de Tríceps en Polea": "HAS8uy73HqM",
+  Fondos: "DMRoiKU0-xQ",
+  // Pecho / Espalda extra
+  "Peck Deck": "WKfTStqIXrw",
+  Pullover: "5XO5KyDUAbE",
+  Encogimientos: "q7yCmRbQ5m0",
   // Core
   "Plancha Abdominal": "AD1YG9b88bk",
   "Crunch Abdominal": "yhHsPYtzYuU",
