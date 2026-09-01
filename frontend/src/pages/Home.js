@@ -28,6 +28,23 @@ export default function Home() {
     return { total, volume, minutes };
   }, [sessions]);
 
+  const streak = useMemo(() => {
+    const weekStart = (d) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+      return x.getTime();
+    };
+    const weeks = new Set(sessions.map((s) => weekStart(new Date(s.startedAt))));
+    const now = weekStart(new Date());
+    const MS_WEEK = 7 * 24 * 3600 * 1000;
+    let count = 0;
+    let cursor = weeks.has(now) ? now : now - MS_WEEK;
+    while (weeks.has(cursor)) { count++; cursor -= MS_WEEK; }
+    const last8 = Array.from({ length: 8 }, (_, i) => weeks.has(now - (7 - i) * MS_WEEK));
+    return { count, thisWeek: weeks.has(now), last8 };
+  }, [sessions]);
+
   const recent = sessions[0];
 
   return (
@@ -66,6 +83,48 @@ export default function Home() {
           <StatCard value={fmtNum(stats.volume)} label="Kg totales" testid="home-stat-volume" />
           <StatCard value={fmtNum(stats.minutes)} label="Minutos" testid="home-stat-minutes" />
         </div>
+      )}
+
+      {/* Weekly streak */}
+      {sessions.length > 0 && (
+        <Card className="p-4 mb-8 flex items-center justify-between gap-4" data-testid="home-streak-card">
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{ backgroundColor: streak.count > 0 ? "rgba(212,255,0,0.15)" : "rgba(161,161,170,0.12)" }}
+            >
+              <Flame className={cn("w-5 h-5", streak.count > 0 ? "text-volt" : "text-muted")} />
+            </div>
+            <div className="min-w-0">
+              <Overline>Racha semanal</Overline>
+              <p className="font-heading uppercase text-lg leading-tight" data-testid="home-streak-count">
+                {streak.count > 0
+                  ? `${streak.count} ${streak.count === 1 ? "semana" : "semanas"} seguidas`
+                  : "Sin racha activa"}
+              </p>
+              <p className="text-sub text-xs font-sans">
+                {streak.thisWeek
+                  ? "Esta semana ya has entrenado. ¡Sigue así!"
+                  : streak.count > 0
+                    ? "Entrena esta semana para mantener la racha"
+                    : "Entrena esta semana para empezar una racha"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-end gap-1 shrink-0" data-testid="home-streak-weeks">
+            {streak.last8.map((on, i) => (
+              <span
+                key={i}
+                className="w-2.5 rounded-full"
+                style={{
+                  height: on ? 22 : 10,
+                  backgroundColor: on ? "#D4FF00" : "#3F3F46",
+                  opacity: i === 7 && !on ? 0.5 : 1,
+                }}
+              />
+            ))}
+          </div>
+        </Card>
       )}
 
       {/* Recent */}
