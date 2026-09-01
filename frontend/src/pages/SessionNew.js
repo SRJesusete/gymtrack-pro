@@ -13,6 +13,11 @@ import { Modal } from "../components/Modal";
 import { RestTimer } from "../components/RestTimer";
 
 const REST_OPTIONS = [60, 90, 120, 180];
+const REST_PREFS_KEY = "gymtrack_rest_prefs";
+const restLabel = (s) => (s < 60 ? `${s}s` : `${s / 60} min`);
+const loadRestPrefs = () => {
+  try { return JSON.parse(localStorage.getItem(REST_PREFS_KEY)) || {}; } catch { return {}; }
+};
 
 export default function SessionNew() {
   const navigate = useNavigate();
@@ -26,8 +31,17 @@ export default function SessionNew() {
   const [pickOpen, setPickOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [restDuration, setRestDuration] = useState(90);
+  const [restPrefs, setRestPrefs] = useState(loadRestPrefs);
   const restRef = useRef(null);
   const startRest = (seconds) => restRef.current?.start(seconds);
+  const exerciseRest = (exerciseId) => restPrefs[exerciseId] || restDuration;
+  const setExerciseRest = (exerciseId, seconds) => {
+    setRestPrefs((prev) => {
+      const next = { ...prev, [exerciseId]: seconds };
+      localStorage.setItem(REST_PREFS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     api.get("/exercises").then(({ data }) => setLibrary(data)).finally(() => setLoading(false));
@@ -115,11 +129,11 @@ export default function SessionNew() {
 
       <div className="flex items-center flex-wrap gap-2 mb-6">
         <span className="flex items-center gap-1.5 text-xs font-sans font-bold uppercase tracking-wide text-muted mr-1">
-          <Timer className="w-4 h-4 text-volt" /> Descanso
+          <Timer className="w-4 h-4 text-volt" /> Descanso por defecto
         </span>
         {REST_OPTIONS.map((s) => (
           <Chip key={s} active={restDuration === s} color="#D4FF00" onClick={() => setRestDuration(s)} testid={`rest-option-${s}`}>
-            {s < 60 ? `${s}s` : `${s / 60} min`}
+            {restLabel(s)}
           </Chip>
         ))}
       </div>
@@ -136,7 +150,22 @@ export default function SessionNew() {
                     <p className="font-heading font-semibold uppercase text-lg">{e.exerciseName}</p>
                     <p className="text-xs font-sans" style={{ color: gc }}>{e.muscleGroup}</p>
                   </div>
-                  <button onClick={() => removeExercise(i)} data-testid={`session-remove-ex-${i}`} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative flex items-center" title="Descanso para este ejercicio">
+                      <Timer className={`w-3.5 h-3.5 absolute left-2 pointer-events-none ${restPrefs[e.exerciseId] ? "text-volt" : "text-muted"}`} />
+                      <select
+                        value={exerciseRest(e.exerciseId)}
+                        onChange={(ev) => setExerciseRest(e.exerciseId, parseInt(ev.target.value))}
+                        data-testid={`session-ex-rest-${i}`}
+                        className={`appearance-none bg-bg border rounded-lg pl-7 pr-2 py-1.5 text-xs font-sans font-bold focus:outline-none focus:border-volt cursor-pointer ${restPrefs[e.exerciseId] ? "border-volt/50 text-volt" : "border-border text-sub"}`}
+                      >
+                        {REST_OPTIONS.map((s) => (
+                          <option key={s} value={s}>{restLabel(s)}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button onClick={() => removeExercise(i)} data-testid={`session-remove-ex-${i}`} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mb-1 px-1">
                   <span className="w-8 text-[10px] font-sans font-bold uppercase text-muted">Set</span>
@@ -153,7 +182,7 @@ export default function SessionNew() {
                         className="flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-txt text-center focus:outline-none focus:border-volt font-sans" />
                       <input type="number" value={s.reps} onChange={(ev) => updateSet(i, j, "reps", ev.target.value)} placeholder="0" data-testid={`session-set-reps-${i}-${j}`}
                         className="flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-txt text-center focus:outline-none focus:border-volt font-sans" />
-                      <button onClick={() => startRest(restDuration)} data-testid={`session-set-rest-${i}-${j}`} title="Iniciar descanso" className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-volt hover:bg-volt/10 transition-colors"><Timer className="w-4 h-4" /></button>
+                      <button onClick={() => startRest(exerciseRest(e.exerciseId))} data-testid={`session-set-rest-${i}-${j}`} title={`Iniciar descanso (${restLabel(exerciseRest(e.exerciseId))})`} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-volt hover:bg-volt/10 transition-colors"><Timer className="w-4 h-4" /></button>
                       <button onClick={() => removeSet(i, j)} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-danger"><X className="w-4 h-4" /></button>
                     </div>
                   ))}
