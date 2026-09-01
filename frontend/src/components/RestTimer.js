@@ -117,7 +117,7 @@ export const RestTimer = forwardRef(function RestTimer(_, ref) {
       >
         <div
           className="absolute inset-y-0 left-0 transition-[width] duration-300 ease-linear"
-          style={{ width: `${pct}%`, backgroundColor: done ? "#D4FF00" : "rgba(212,255,0,0.12)" }}
+          style={{ width: done ? "100%" : `${pct}%`, backgroundColor: done ? "#D4FF00" : "rgba(212,255,0,0.12)" }}
         />
         <div className="relative flex items-center gap-3 px-4 py-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -144,14 +144,14 @@ export const RestTimer = forwardRef(function RestTimer(_, ref) {
                 <button
                   onClick={() => start(total)}
                   data-testid="rest-timer-repeat"
-                  className="flex items-center gap-1 rounded-full bg-obsidian text-volt px-3 py-2 font-sans font-bold text-xs active:scale-95 transition-transform"
+                  className="flex items-center gap-1 rounded-full bg-bg text-volt px-3 py-2 font-sans font-bold text-xs active:scale-95 transition-transform"
                 >
                   <RotateCcw className="w-4 h-4" /> Otra vez
                 </button>
                 <button
                   onClick={stop}
                   data-testid="rest-timer-close"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-obsidian text-white active:scale-95 transition-transform"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-bg text-txt active:scale-95 transition-transform"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -175,7 +175,7 @@ export const RestTimer = forwardRef(function RestTimer(_, ref) {
                 <button
                   onClick={togglePause}
                   data-testid="rest-timer-pause"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-volt text-obsidian active:scale-95 transition-transform"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-volt text-bg active:scale-95 transition-transform"
                 >
                   {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 </button>
