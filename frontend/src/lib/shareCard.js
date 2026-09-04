@@ -185,6 +185,122 @@ export async function buildShareCard(session) {
   return canvas;
 }
 
+export async function buildStreakCard(streak) {
+  try {
+    await Promise.all([
+      document.fonts.load("700 80px Oswald"),
+      document.fonts.load("700 32px Manrope"),
+      document.fonts.load("500 30px Manrope"),
+    ]);
+  } catch (_) {}
+
+  const count = streak.count || 0;
+  const thisWeek = !!streak.thisWeek;
+  const last8 = streak.last8 || [];
+  const totalWorkouts = streak.totalWorkouts || 0;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = VOLT;
+  ctx.fillRect(0, 0, W, 12);
+
+  const M = 72;
+  let y = 110;
+
+  // Brand
+  ctx.textAlign = "left";
+  ctx.fillStyle = VOLT;
+  ctx.beginPath();
+  ctx.arc(M + 10, y - 10, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = h(40);
+  ctx.fillStyle = TXT;
+  ctx.fillText("GYMTRACK", M + 36, y);
+  const bw = ctx.measureText("GYMTRACK").width;
+  ctx.fillStyle = VOLT;
+  ctx.fillText(" PRO", M + 36 + bw, y);
+
+  // Label
+  y += 110;
+  ctx.textAlign = "center";
+  ctx.fillStyle = VOLT;
+  ctx.font = s(30, 800);
+  ctx.fillText("RACHA SEMANAL", W / 2, y);
+
+  // Flame + big number
+  y += 250;
+  ctx.fillStyle = VOLT;
+  ctx.font = h(300);
+  ctx.fillText(String(count), W / 2, y);
+
+  // Sub label
+  y += 90;
+  ctx.fillStyle = TXT;
+  ctx.font = h(70);
+  const unit = count === 1 ? "SEMANA SEGUIDA" : "SEMANAS SEGUIDAS";
+  ctx.fillText(unit, W / 2, y);
+
+  // Motivational line
+  y += 70;
+  ctx.fillStyle = SUB;
+  ctx.font = s(32, 600);
+  let motive;
+  if (count === 0) motive = "Empieza tu racha esta semana";
+  else if (thisWeek) motive = "Esta semana ya has entrenado. ¡Sigue así!";
+  else motive = "Entrena esta semana para mantenerla";
+  ctx.fillText(motive, W / 2, y);
+
+  // 8-week bars
+  y += 130;
+  const barW = 44;
+  const gap = 28;
+  const totalW = last8.length * barW + (last8.length - 1) * gap;
+  let bx = (W - totalW) / 2;
+  const baseY = y + 130;
+  last8.forEach((on, i) => {
+    const bh = on ? 130 : 46;
+    ctx.fillStyle = on ? VOLT : "#3F3F46";
+    if (i === last8.length - 1 && !on) ctx.globalAlpha = 0.5;
+    roundRect(ctx, bx, baseY - bh, barW, bh, 12);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    bx += barW + gap;
+  });
+  y = baseY + 60;
+  ctx.fillStyle = MUTED;
+  ctx.font = s(24, 700);
+  ctx.fillText("ÚLTIMAS 8 SEMANAS", W / 2, y);
+
+  // Total workouts stat
+  y += 120;
+  const cardW = 480;
+  const cardX = (W - cardW) / 2;
+  ctx.fillStyle = SURFACE;
+  roundRect(ctx, cardX, y, cardW, 150, 20);
+  ctx.fill();
+  ctx.fillStyle = VOLT;
+  ctx.font = h(72);
+  ctx.fillText(totalWorkouts.toLocaleString("es-ES"), W / 2, y + 90);
+  ctx.fillStyle = MUTED;
+  ctx.font = s(24, 800);
+  ctx.fillText("ENTRENOS TOTALES", W / 2, y + 128);
+
+  // Footer
+  ctx.textAlign = "left";
+  ctx.fillStyle = MUTED;
+  ctx.font = s(24, 700);
+  ctx.fillText("Registrado con GymTrack Pro", M, H - 60);
+  ctx.fillStyle = VOLT;
+  ctx.fillRect(W - M - 120, H - 78, 120, 6);
+
+  return canvas;
+}
+
 export function canvasToBlob(canvas) {
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }

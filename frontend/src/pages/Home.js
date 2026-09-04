@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Clock, Dumbbell, Plus, Sprout, Flame, Trophy, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import { ChevronDown, Clock, Dumbbell, Plus, Sprout, Flame, Trophy, ArrowRight, Share2, Download } from "lucide-react";
 import { LEVELS, getPresetsByLevel } from "../constants/workoutPresets";
 import { groupColor } from "../constants/muscleGroups";
 import { useAuth } from "../context/AuthContext";
 import { listSessions } from "../lib/sessionData";
+import { buildStreakCard, canvasToBlob } from "../lib/shareCard";
 import { Card, Overline, StatCard } from "../components/ui";
+import { Modal } from "../components/Modal";
 import { cn, fmtNum, formatDate } from "../lib/utils";
 
 const LEVEL_ICONS = { Sprout, Flame, Trophy };
@@ -16,6 +19,9 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const [openLevel, setOpenLevel] = useState("principiante");
   const [sessions, setSessions] = useState([]);
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareBlob, setShareBlob] = useState(null);
+  const [building, setBuilding] = useState(false);
 
   useEffect(() => {
     listSessions(isAuthenticated).then((data) => setSessions(data)).catch(() => {});
@@ -46,6 +52,48 @@ export default function Home() {
   }, [sessions]);
 
   const recent = sessions[0];
+
+  const openShare = async () => {
+    setBuilding(true);
+    try {
+      const canvas = await buildStreakCard({ ...streak, totalWorkouts: sessions.length });
+      const blob = await canvasToBlob(canvas);
+      if (shareUrl) URL.revokeObjectURL(shareUrl);
+      setShareBlob(blob);
+      setShareUrl(URL.createObjectURL(blob));
+    } catch (e) {
+      toast.error("No se pudo generar la imagen");
+    } finally {
+      setBuilding(false);
+    }
+  };
+
+  const closeShare = () => {
+    if (shareUrl) URL.revokeObjectURL(shareUrl);
+    setShareUrl(null);
+    setShareBlob(null);
+  };
+
+  const doShare = async () => {
+    const file = new File([shareBlob], "racha-gymtrack.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: "Mi racha en GymTrack Pro" });
+        return;
+      } catch (e) {
+        if (e.name === "AbortError") return;
+      }
+    }
+    doDownload();
+  };
+
+  const doDownload = () => {
+    const a = document.createElement("a");
+    a.href = shareUrl;
+    a.download = "racha-gymtrack.png";
+    a.click();
+    toast.success("Imagen descargada");
+  };
 
   return (
     <div className="animate-fade-up">
@@ -111,21 +159,48 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="flex items-end gap-1 shrink-0" data-testid="home-streak-weeks">
-            {streak.last8.map((on, i) => (
-              <span
-                key={i}
-                className="w-2.5 rounded-full"
-                style={{
-                  height: on ? 22 : 10,
-                  backgroundColor: on ? "#D4FF00" : "#3F3F46",
-                  opacity: i === 7 && !on ? 0.5 : 1,
-                }}
-              />
-            ))}
+          <div className="flex items-end gap-3 shrink-0">
+            <div className="flex items-end gap-1" data-testid="home-streak-weeks">
+              {streak.last8.map((on, i) => (
+                <span
+                  key={i}
+                  className="w-2.5 rounded-full"
+                  style={{
+                    height: on ? 22 : 10,
+                    backgroundColor: on ? "#D4FF00" : "#3F3F46",
+                    opacity: i === 7 && !on ? 0.5 : 1,
+                  }}
+                />
+              ))}
+            </div>
+            <button
+              onClick={openShare}
+              disabled={building}
+              data-testid="home-streak-share-btn"
+              title="Compartir racha"
+              className="w-9 h-9 flex items-center justify-center rounded-lg border border-volt/40 text-volt hover:bg-volt/10 transition-colors disabled:opacity-50"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
           </div>
         </Card>
       )}
+
+      <Modal open={!!shareUrl} onClose={closeShare} title="Compartir racha" testid="streak-share-modal">
+        {shareUrl && (
+          <div className="flex flex-col gap-4">
+            <img src={shareUrl} alt="Resumen de la racha" data-testid="streak-share-preview-img" className="w-full rounded-xl border border-border" />
+            <div className="flex gap-3">
+              <button onClick={doShare} data-testid="streak-share-confirm-btn" className="flex-1 flex items-center justify-center gap-2 bg-volt text-bg font-heading font-bold uppercase tracking-wider px-4 py-3 rounded-lg hover:bg-voltDim active:scale-95 transition-all">
+                <Share2 className="w-5 h-5" /> Compartir
+              </button>
+              <button onClick={doDownload} data-testid="streak-share-download-btn" className="flex-1 flex items-center justify-center gap-2 border border-border text-txt font-heading font-bold uppercase tracking-wider px-4 py-3 rounded-lg hover:border-volt active:scale-95 transition-all">
+                <Download className="w-5 h-5" /> Descargar
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Recent */}
       {recent && (
