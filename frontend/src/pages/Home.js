@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ChevronDown, Clock, Dumbbell, Plus, Sprout, Flame, Trophy, ArrowRight, Share2, Download } from "lucide-react";
+import { ChevronDown, Clock, Dumbbell, Plus, Sprout, Flame, Trophy, ArrowRight, Share2, Download, Target, Check } from "lucide-react";
 import { LEVELS, getPresetsByLevel } from "../constants/workoutPresets";
 import { groupColor } from "../constants/muscleGroups";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +12,7 @@ import { Modal } from "../components/Modal";
 import { cn, fmtNum, formatDate } from "../lib/utils";
 
 const LEVEL_ICONS = { Sprout, Flame, Trophy };
+const GOAL_KEY = "gymtrack_weekly_goal";
 const HERO = "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxkYXJrJTIwZ3ltJTIwd29ya291dCUyMGF0aGxldGUlMjBsaWZ0aW5nJTIwd2VpZ2h0c3xlbnwwfHx8fDE3ODMzMzYwMjh8MA&ixlib=rb-4.1.0&q=85";
 
 export default function Home() {
@@ -22,6 +23,15 @@ export default function Home() {
   const [shareUrl, setShareUrl] = useState(null);
   const [shareBlob, setShareBlob] = useState(null);
   const [building, setBuilding] = useState(false);
+  const [weeklyGoal, setWeeklyGoal] = useState(() => {
+    const v = parseInt(localStorage.getItem(GOAL_KEY), 10);
+    return v >= 1 && v <= 7 ? v : 3;
+  });
+
+  const setGoal = (n) => {
+    setWeeklyGoal(n);
+    localStorage.setItem(GOAL_KEY, String(n));
+  };
 
   useEffect(() => {
     listSessions(isAuthenticated).then((data) => setSessions(data)).catch(() => {});
@@ -49,6 +59,24 @@ export default function Home() {
     while (weeks.has(cursor)) { count++; cursor -= MS_WEEK; }
     const last8 = Array.from({ length: 8 }, (_, i) => weeks.has(now - (7 - i) * MS_WEEK));
     return { count, thisWeek: weeks.has(now), last8 };
+  }, [sessions]);
+
+  const daysThisWeek = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    const startMs = start.getTime();
+    const endMs = startMs + 7 * 24 * 3600 * 1000;
+    const days = new Set();
+    sessions.forEach((s) => {
+      const t = new Date(s.startedAt).getTime();
+      if (t >= startMs && t < endMs) {
+        const d = new Date(s.startedAt);
+        d.setHours(0, 0, 0, 0);
+        days.add(d.getTime());
+      }
+    });
+    return days.size;
   }, [sessions]);
 
   const recent = sessions[0];
@@ -132,6 +160,64 @@ export default function Home() {
           <StatCard value={fmtNum(stats.minutes)} label="Minutos" testid="home-stat-minutes" />
         </div>
       )}
+
+      {/* Weekly goal */}
+      {sessions.length > 0 && (() => {
+        const met = daysThisWeek >= weeklyGoal;
+        return (
+          <Card className="p-4 mb-8" data-testid="home-goal-card">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: met ? "rgba(212,255,0,0.15)" : "rgba(161,161,170,0.12)" }}
+                >
+                  {met ? <Check className="w-5 h-5 text-volt" /> : <Target className="w-5 h-5 text-muted" />}
+                </div>
+                <div className="min-w-0">
+                  <Overline>Meta semanal</Overline>
+                  <p className="font-heading uppercase text-lg leading-tight" data-testid="home-goal-progress">
+                    {daysThisWeek} de {weeklyGoal} {weeklyGoal === 1 ? "día" : "días"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setGoal(Math.max(1, weeklyGoal - 1))}
+                  disabled={weeklyGoal <= 1}
+                  data-testid="home-goal-decrease"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-border text-txt hover:border-volt disabled:opacity-40 transition-colors font-heading text-lg"
+                >
+                  −
+                </button>
+                <span className="w-6 text-center font-heading text-xl text-volt" data-testid="home-goal-value">{weeklyGoal}</span>
+                <button
+                  onClick={() => setGoal(Math.min(7, weeklyGoal + 1))}
+                  disabled={weeklyGoal >= 7}
+                  data-testid="home-goal-increase"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-border text-txt hover:border-volt disabled:opacity-40 transition-colors font-heading text-lg"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 mt-4" data-testid="home-goal-dots">
+              {Array.from({ length: weeklyGoal }, (_, i) => (
+                <span
+                  key={i}
+                  className="flex-1 h-2.5 rounded-full transition-colors"
+                  style={{ backgroundColor: i < daysThisWeek ? "#D4FF00" : "#3F3F46" }}
+                />
+              ))}
+            </div>
+            <p className="text-sub text-xs font-sans mt-2">
+              {met
+                ? "¡Meta cumplida esta semana!"
+                : `Te ${weeklyGoal - daysThisWeek === 1 ? "queda 1 día" : `quedan ${weeklyGoal - daysThisWeek} días`} para alcanzar tu meta`}
+            </p>
+          </Card>
+        );
+      })()}
 
       {/* Weekly streak */}
       {sessions.length > 0 && (
