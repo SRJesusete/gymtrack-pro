@@ -84,7 +84,7 @@ export default function Home() {
   const openShare = async () => {
     setBuilding(true);
     try {
-      const canvas = await buildStreakCard({ ...streak, totalWorkouts: sessions.length });
+      const canvas = await buildStreakCard({ ...streak, totalWorkouts: sessions.length, weeklyGoal, daysThisWeek });
       const blob = await canvasToBlob(canvas);
       if (shareUrl) URL.revokeObjectURL(shareUrl);
       setShareBlob(blob);

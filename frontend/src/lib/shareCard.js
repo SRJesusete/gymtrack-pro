@@ -198,6 +198,8 @@ export async function buildStreakCard(streak) {
   const thisWeek = !!streak.thisWeek;
   const last8 = streak.last8 || [];
   const totalWorkouts = streak.totalWorkouts || 0;
+  const weeklyGoal = streak.weeklyGoal || 0;
+  const daysThisWeek = streak.daysThisWeek || 0;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -271,24 +273,65 @@ export async function buildStreakCard(streak) {
     ctx.globalAlpha = 1;
     bx += barW + gap;
   });
-  y = baseY + 60;
+  y = baseY + 55;
   ctx.fillStyle = MUTED;
   ctx.font = s(24, 700);
   ctx.fillText("ÚLTIMAS 8 SEMANAS", W / 2, y);
 
-  // Total workouts stat
-  y += 120;
-  const cardW = 480;
-  const cardX = (W - cardW) / 2;
-  ctx.fillStyle = SURFACE;
-  roundRect(ctx, cardX, y, cardW, 150, 20);
-  ctx.fill();
-  ctx.fillStyle = VOLT;
-  ctx.font = h(72);
-  ctx.fillText(totalWorkouts.toLocaleString("es-ES"), W / 2, y + 90);
-  ctx.fillStyle = MUTED;
-  ctx.font = s(24, 800);
-  ctx.fillText("ENTRENOS TOTALES", W / 2, y + 128);
+  // Bottom stats: totals + weekly goal
+  y += 80;
+  if (weeklyGoal > 0) {
+    const gap2 = 24;
+    const cardW2 = (W - M * 2 - gap2) / 2;
+    const cardH = 210;
+    const met = daysThisWeek >= weeklyGoal;
+    // Left: total workouts
+    ctx.fillStyle = SURFACE;
+    roundRect(ctx, M, y, cardW2, cardH, 20);
+    ctx.fill();
+    ctx.fillStyle = VOLT;
+    ctx.font = h(72);
+    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), M + cardW2 / 2, y + 100);
+    ctx.fillStyle = MUTED;
+    ctx.font = s(24, 800);
+    ctx.fillText("ENTRENOS TOTALES", M + cardW2 / 2, y + 140);
+    // Right: weekly goal
+    const gx = M + cardW2 + gap2;
+    ctx.fillStyle = SURFACE;
+    roundRect(ctx, gx, y, cardW2, cardH, 20);
+    ctx.fill();
+    ctx.fillStyle = met ? VOLT : TXT;
+    ctx.font = h(72);
+    ctx.fillText(`${daysThisWeek}/${weeklyGoal}`, gx + cardW2 / 2, y + 100);
+    ctx.fillStyle = MUTED;
+    ctx.font = s(24, 800);
+    ctx.fillText(met ? "META CUMPLIDA" : "META SEMANAL (DÍAS)", gx + cardW2 / 2, y + 140);
+    // Goal dots inside right card
+    const dotsN = weeklyGoal;
+    const dGap = 12;
+    const dW = Math.min(40, (cardW2 - 56 - (dotsN - 1) * dGap) / dotsN);
+    const dTotal = dotsN * dW + (dotsN - 1) * dGap;
+    let dx = gx + (cardW2 - dTotal) / 2;
+    const dy = y + 165;
+    for (let i = 0; i < dotsN; i++) {
+      ctx.fillStyle = i < daysThisWeek ? VOLT : "#3F3F46";
+      roundRect(ctx, dx, dy, dW, 14, 7);
+      ctx.fill();
+      dx += dW + dGap;
+    }
+  } else {
+    const cardW = 480;
+    const cardX = (W - cardW) / 2;
+    ctx.fillStyle = SURFACE;
+    roundRect(ctx, cardX, y, cardW, 150, 20);
+    ctx.fill();
+    ctx.fillStyle = VOLT;
+    ctx.font = h(72);
+    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), W / 2, y + 90);
+    ctx.fillStyle = MUTED;
+    ctx.font = s(24, 800);
+    ctx.fillText("ENTRENOS TOTALES", W / 2, y + 128);
+  }
 
   // Footer
   ctx.textAlign = "left";
