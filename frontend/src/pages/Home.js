@@ -99,6 +99,23 @@ export default function Home() {
     return days.size;
   }, [sessions]);
 
+  const weekDays = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    const startMs = start.getTime();
+    const endMs = startMs + 7 * 24 * 3600 * 1000;
+    const arr = [false, false, false, false, false, false, false];
+    sessions.forEach((s) => {
+      const t = new Date(s.startedAt).getTime();
+      if (t >= startMs && t < endMs) {
+        const idx = (new Date(s.startedAt).getDay() + 6) % 7;
+        arr[idx] = true;
+      }
+    });
+    return arr;
+  }, [sessions]);
+
   useEffect(() => {
     if (weeklyGoal <= 0 || daysThisWeek < weeklyGoal) return;
     const wk = currentWeekKey();
@@ -113,7 +130,7 @@ export default function Home() {
   const openShare = async () => {
     setBuilding(true);
     try {
-      const canvas = await buildStreakCard({ ...streak, totalWorkouts: sessions.length, weeklyGoal, daysThisWeek });
+      const canvas = await buildStreakCard({ ...streak, totalWorkouts: sessions.length, weeklyGoal, daysThisWeek, weekDays });
       const blob = await canvasToBlob(canvas);
       if (shareUrl) URL.revokeObjectURL(shareUrl);
       setShareBlob(blob);

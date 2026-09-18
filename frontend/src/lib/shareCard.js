@@ -200,6 +200,7 @@ export async function buildStreakCard(streak) {
   const totalWorkouts = streak.totalWorkouts || 0;
   const weeklyGoal = streak.weeklyGoal || 0;
   const daysThisWeek = streak.daysThisWeek || 0;
+  const weekDays = Array.isArray(streak.weekDays) ? streak.weekDays : [];
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -228,29 +229,29 @@ export async function buildStreakCard(streak) {
   ctx.fillText(" PRO", M + 36 + bw, y);
 
   // Label
-  y += 110;
+  y += 100;
   ctx.textAlign = "center";
   ctx.fillStyle = VOLT;
   ctx.font = s(30, 800);
   ctx.fillText("RACHA SEMANAL", W / 2, y);
 
-  // Flame + big number
-  y += 250;
+  // Big number
+  y += 200;
   ctx.fillStyle = VOLT;
-  ctx.font = h(300);
+  ctx.font = h(240);
   ctx.fillText(String(count), W / 2, y);
 
   // Sub label
-  y += 90;
+  y += 80;
   ctx.fillStyle = TXT;
-  ctx.font = h(70);
+  ctx.font = h(64);
   const unit = count === 1 ? "SEMANA SEGUIDA" : "SEMANAS SEGUIDAS";
   ctx.fillText(unit, W / 2, y);
 
   // Motivational line
-  y += 70;
+  y += 58;
   ctx.fillStyle = SUB;
-  ctx.font = s(32, 600);
+  ctx.font = s(30, 600);
   let motive;
   if (count === 0) motive = "Empieza tu racha esta semana";
   else if (thisWeek) motive = "Esta semana ya has entrenado. ¡Sigue así!";
@@ -258,14 +259,14 @@ export async function buildStreakCard(streak) {
   ctx.fillText(motive, W / 2, y);
 
   // 8-week bars
-  y += 130;
+  y += 95;
   const barW = 44;
   const gap = 28;
   const totalW = last8.length * barW + (last8.length - 1) * gap;
   let bx = (W - totalW) / 2;
-  const baseY = y + 130;
+  const baseY = y + 105;
   last8.forEach((on, i) => {
-    const bh = on ? 130 : 46;
+    const bh = on ? 105 : 40;
     ctx.fillStyle = on ? VOLT : "#3F3F46";
     if (i === last8.length - 1 && !on) ctx.globalAlpha = 0.5;
     roundRect(ctx, bx, baseY - bh, barW, bh, 12);
@@ -273,46 +274,75 @@ export async function buildStreakCard(streak) {
     ctx.globalAlpha = 1;
     bx += barW + gap;
   });
-  y = baseY + 55;
+  y = baseY + 48;
   ctx.fillStyle = MUTED;
   ctx.font = s(24, 700);
   ctx.fillText("ÚLTIMAS 8 SEMANAS", W / 2, y);
 
+  // Mini weekly calendar
+  y += 78;
+  ctx.fillStyle = MUTED;
+  ctx.font = s(24, 700);
+  ctx.fillText("ESTA SEMANA", W / 2, y);
+  const dayLabels = ["L", "M", "X", "J", "V", "S", "D"];
+  const chipGap = 18;
+  const chipW = 104;
+  const chipsTotal = 7 * chipW + 6 * chipGap;
+  let cx = (W - chipsTotal) / 2;
+  const chipY = y + 24;
+  for (let i = 0; i < 7; i++) {
+    const on = !!weekDays[i];
+    ctx.fillStyle = on ? VOLT : SURFACE;
+    roundRect(ctx, cx, chipY, chipW, 104, 18);
+    ctx.fill();
+    if (!on) {
+      ctx.strokeStyle = "#27272A";
+      ctx.lineWidth = 2;
+      roundRect(ctx, cx, chipY, chipW, 104, 18);
+      ctx.stroke();
+    }
+    ctx.fillStyle = on ? BG : MUTED;
+    ctx.font = h(46);
+    ctx.fillText(dayLabels[i], cx + chipW / 2, chipY + 68);
+    cx += chipW + chipGap;
+  }
+  y = chipY + 104;
+
   // Bottom stats: totals + weekly goal
-  y += 80;
+  y += 40;
   if (weeklyGoal > 0) {
     const gap2 = 24;
     const cardW2 = (W - M * 2 - gap2) / 2;
-    const cardH = 210;
+    const cardH = 175;
     const met = daysThisWeek >= weeklyGoal;
     // Left: total workouts
     ctx.fillStyle = SURFACE;
     roundRect(ctx, M, y, cardW2, cardH, 20);
     ctx.fill();
     ctx.fillStyle = VOLT;
-    ctx.font = h(72);
-    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), M + cardW2 / 2, y + 100);
+    ctx.font = h(68);
+    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), M + cardW2 / 2, y + 82);
     ctx.fillStyle = MUTED;
-    ctx.font = s(24, 800);
-    ctx.fillText("ENTRENOS TOTALES", M + cardW2 / 2, y + 140);
+    ctx.font = s(23, 800);
+    ctx.fillText("ENTRENOS TOTALES", M + cardW2 / 2, y + 122);
     // Right: weekly goal
     const gx = M + cardW2 + gap2;
     ctx.fillStyle = SURFACE;
     roundRect(ctx, gx, y, cardW2, cardH, 20);
     ctx.fill();
     ctx.fillStyle = met ? VOLT : TXT;
-    ctx.font = h(72);
-    ctx.fillText(`${daysThisWeek}/${weeklyGoal}`, gx + cardW2 / 2, y + 100);
+    ctx.font = h(68);
+    ctx.fillText(`${daysThisWeek}/${weeklyGoal}`, gx + cardW2 / 2, y + 82);
     ctx.fillStyle = MUTED;
-    ctx.font = s(24, 800);
-    ctx.fillText(met ? "META CUMPLIDA" : "META SEMANAL (DÍAS)", gx + cardW2 / 2, y + 140);
+    ctx.font = s(23, 800);
+    ctx.fillText(met ? "META CUMPLIDA" : "META SEMANAL (DÍAS)", gx + cardW2 / 2, y + 122);
     // Goal dots inside right card
     const dotsN = weeklyGoal;
     const dGap = 12;
     const dW = Math.min(40, (cardW2 - 56 - (dotsN - 1) * dGap) / dotsN);
     const dTotal = dotsN * dW + (dotsN - 1) * dGap;
     let dx = gx + (cardW2 - dTotal) / 2;
-    const dy = y + 165;
+    const dy = y + 142;
     for (let i = 0; i < dotsN; i++) {
       ctx.fillStyle = i < daysThisWeek ? VOLT : "#3F3F46";
       roundRect(ctx, dx, dy, dW, 14, 7);
@@ -326,11 +356,11 @@ export async function buildStreakCard(streak) {
     roundRect(ctx, cardX, y, cardW, 150, 20);
     ctx.fill();
     ctx.fillStyle = VOLT;
-    ctx.font = h(72);
-    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), W / 2, y + 90);
+    ctx.font = h(68);
+    ctx.fillText(totalWorkouts.toLocaleString("es-ES"), W / 2, y + 88);
     ctx.fillStyle = MUTED;
     ctx.font = s(24, 800);
-    ctx.fillText("ENTRENOS TOTALES", W / 2, y + 128);
+    ctx.fillText("ENTRENOS TOTALES", W / 2, y + 126);
   }
 
   // Footer
