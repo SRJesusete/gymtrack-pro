@@ -7,12 +7,32 @@ import { groupColor } from "../constants/muscleGroups";
 import { useAuth } from "../context/AuthContext";
 import { listSessions } from "../lib/sessionData";
 import { buildStreakCard, canvasToBlob } from "../lib/shareCard";
+import confetti from "canvas-confetti";
 import { Card, Overline, StatCard } from "../components/ui";
 import { Modal } from "../components/Modal";
 import { cn, fmtNum, formatDate } from "../lib/utils";
 
 const LEVEL_ICONS = { Sprout, Flame, Trophy };
 const GOAL_KEY = "gymtrack_weekly_goal";
+const CELEBRATE_KEY = "gymtrack_goal_celebrated_week";
+
+const currentWeekKey = () => {
+  const x = new Date();
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return String(x.getTime());
+};
+
+const fireVoltConfetti = () => {
+  const colors = ["#D4FF00", "#B8E000", "#F4F4F5"];
+  confetti({ particleCount: 100, spread: 78, startVelocity: 42, origin: { y: 0.62 }, colors, scalar: 1.1 });
+  const end = Date.now() + 800;
+  (function frame() {
+    confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors });
+    confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+};
 const HERO = "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxkYXJrJTIwZ3ltJTIwd29ya291dCUyMGF0aGxldGUlMjBsaWZ0aW5nJTIwd2VpZ2h0c3xlbnwwfHx8fDE3ODMzMzYwMjh8MA&ixlib=rb-4.1.0&q=85";
 
 export default function Home() {
@@ -78,6 +98,15 @@ export default function Home() {
     });
     return days.size;
   }, [sessions]);
+
+  useEffect(() => {
+    if (weeklyGoal <= 0 || daysThisWeek < weeklyGoal) return;
+    const wk = currentWeekKey();
+    if (localStorage.getItem(CELEBRATE_KEY) === wk) return;
+    localStorage.setItem(CELEBRATE_KEY, wk);
+    fireVoltConfetti();
+    toast.success("¡Meta semanal cumplida!");
+  }, [daysThisWeek, weeklyGoal]);
 
   const recent = sessions[0];
 
