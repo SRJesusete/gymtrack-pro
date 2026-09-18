@@ -1,0 +1,19 @@
+{
+  "summary": "Frontend-only test of 'Meta En Imagen' feature: buildStreakCard now draws weekly goal card in canvas. Seeded 3 guest sessions in current week + weekly goal (3, then 5, then 0). All 4 scenarios verified: (1) modal opens & preview img is 1080x1350 blob with goal=3, (2) download button downloads 'racha-gymtrack.png', (3) after changing goal to 5 via home-goal-increase and reopening modal, preview regenerated 1080x1350 with new goal, (4) with weeklyGoal=0 the fallback single-card layout still generates 1080x1350 without error. Zero console errors, zero pageerrors, no canvas exceptions.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "guest mode, no auth",
+  "seed_data_creation": "localStorage 'gymtrack_guest_sessions' = 3 sessions in current week; 'gymtrack_weekly_goal' tested at 3, 5, and 0.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "buildStreakCard in /app/frontend/src/lib/shareCard.js correctly renders dual cards (ENTRENOS TOTALES + META SEMANAL) when weeklyGoal>0 and single card fallback when weeklyGoal=0. Preview img always 1080x1350 blob URL. Download filename 'racha-gymtrack.png'. Selectors used: home-streak-share-btn, streak-share-modal, streak-share-preview-img, streak-share-download-btn, home-goal-increase."
+}
